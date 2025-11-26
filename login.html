@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Besties - Access Required</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: "Roboto", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: radial-gradient(circle at top, #ffb3dd 0, #05040a 35%, #05040a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .bg-blur {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 0% 0%, rgba(255, 182, 219, 0.3), transparent 55%),
+                radial-gradient(circle at 100% 0%, rgba(255, 96, 167, 0.35), transparent 55%),
+                radial-gradient(circle at 50% 100%, rgba(255, 180, 220, 0.25), transparent 60%);
+            mix-blend-mode: screen;
+            opacity: 0.9;
+            z-index: -1;
+        }
+        
+        .container {
+            background: linear-gradient(145deg, rgba(23, 13, 33, 0.98), rgba(37, 19, 50, 0.98));
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 26px;
+            padding: 40px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7);
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: conic-gradient(from 120deg, #ffffff, #ff9fd8, #ff2b8a, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #c9c3cf;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #ffd0e8;
+            margin-bottom: 8px;
+        }
+        
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 182, 219, 0.3);
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.4);
+            color: #ffffff;
+            font-size: 14px;
+            transition: 0.2s ease;
+        }
+        
+        input[type="password"]:focus {
+            outline: none;
+            border-color: rgba(255, 96, 167, 0.6);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 4px rgba(255, 96, 167, 0.12);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px 20px;
+            background: linear-gradient(135deg, #ff5faf, #ff2b8a);
+            color: #160614;
+            border: none;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s ease;
+            box-shadow: 0 14px 30px rgba(255, 96, 167, 0.7);
+        }
+        
+        button:hover {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 18px 40px rgba(255, 96, 167, 0.9);
+        }
+        
+        .error {
+            color: #ff5faf;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .info {
+            color: #ffd0e8;
+            font-size: 12px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-blur"></div>
+    
+    <div class="container">
+        <div class="logo">🔒</div>
+        <h1>The Besties Gang</h1>
+        <p class="subtitle">Trang chính thức - Cần mật khẩu để truy cập</p>
+        
+        <form id="accessForm" onsubmit="checkPassword(event)">
+            <div class="form-group">
+                <label for="password">Mật khẩu</label>
+                <input type="password" id="password" placeholder="Nhập mật khẩu" required autofocus>
+            </div>
+            <button type="submit">Truy cập</button>
+            <div class="error" id="error">❌ Mật khẩu không đúng</div>
+        </form>
+        
+        <div class="info">
+            💡 Hỏi Admin hoặc Leader để lấy mật khẩu
+        </div>
+    </div>
+    
+    <script>
+        // Mật khẩu (thay đổi thành mật khẩu của bạn)
+        const PASSWORD = "thebesties2025";
+        
+        function checkPassword(event) {
+            event.preventDefault();
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error');
+            
+            if (password === PASSWORD) {
+                // Lưu session và redirect
+                sessionStorage.setItem('thebesties_access', 'granted');
+                window.location.href = 'index.html';
+            } else {
+                errorDiv.style.display = 'block';
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+            }
+        }
+        
+        // Check nếu đã có access
+        if (sessionStorage.getItem('thebesties_access') === 'granted') {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
