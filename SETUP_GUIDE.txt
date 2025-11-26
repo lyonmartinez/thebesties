@@ -1,0 +1,65 @@
+🚀 HƯỚNG DẪN PUSH LÊN GITHUB & KÍCH HOẠT WEBSITE 24/7
+
+================================================================================
+
+📋 BƯỚC 1: MỞ COMMAND PROMPT / POWERSHELL
+
+Nhấn Windows + R, gõ: powershell
+Sau đó chạy các lệnh dưới đây (copy-paste từng cái):
+
+================================================================================
+
+📋 BƯỚC 2: CHẠY CÁC LỆNH SAU
+
+cd 'c:\Users\ADMID\Desktop\Website The Besties'
+
+git init
+
+git config user.name "The Besties"
+
+git config user.email "gang@thebesties.local"
+
+git add .
+
+git commit -m "Initial commit - The Besties Website"
+
+git branch -M main
+
+git remote add origin https://github.com/lyonmartinez/thebesties.git
+
+git push -u origin main
+
+(Nếu được hỏi đăng nhập, đăng nhập GitHub của bạn)
+
+================================================================================
+
+📋 BƯỚC 3: KÍCH HOẠT GITHUB PAGES
+
+1. Vào: https://github.com/lyonmartinez/thebesties
+2. Bấm: Settings (tab ở trên cùng)
+3. Tìm: Pages (bên trái)
+4. Chọn: Branch = main, Folder = / (root)
+5. Bấm: Save
+
+================================================================================
+
+✅ XONG!
+
+🌐 WEBSITE CỦA BẠN: https://lyonmartinez.github.io/thebesties
+
+⏳ Sẽ chạy đầy đủ trong 1-2 phút. Nếu lỗi 404, chờ thêm 1-2 phút nữa.
+
+================================================================================
+
+📝 LẦN SAU CẬP NHẬT:
+
+Mỗi khi chỉnh sửa file, chạy:
+
+cd 'c:\Users\ADMID\Desktop\Website The Besties'
+git add .
+git commit -m "Cập nhật nội dung"
+git push
+
+Website tự động update trong vài giây ⚡
+
+================================================================================

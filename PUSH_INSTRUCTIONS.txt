@@ -1,0 +1,68 @@
+📱 HƯỚNG DẪN PUSH WEBSITE LÊN GITHUB (BƯỚC BÀY BÂY GIỜ)
+
+==============================================================================
+
+Repo của bạn đã được tạo: https://github.com/lyonmartinez/thebesties
+
+Giờ bạn cần push code từ máy lên GitHub.
+
+==============================================================================
+
+🔴 CÁCH NHANH NHẤT - SỬ DỤNG GIT CLI:
+
+1. Mở Command Prompt hoặc PowerShell
+2. Chạy các lệnh này lần lượt:
+
+   cd "c:\Users\ADMID\Desktop\Website The Besties"
+   
+   git remote -v
+   
+   (Nếu kết quả rỗng hoặc không có "origin", chạy:)
+   git remote add origin https://github.com/lyonmartinez/thebesties.git
+   
+   git branch -M main
+   
+   git push -u origin main
+
+3. Khi được hỏi: Username → nhập tên GitHub (lyonmartinez)
+4. Khi được hỏi: Password → dùng Personal Access Token hoặc Password GitHub
+
+==============================================================================
+
+🟢 CÁCH KHÁC - DÙNG GITHUB DESKTOP (DỄ HƠN):
+
+1. Download: https://desktop.github.com/
+2. Install và mở GitHub Desktop
+3. Đăng nhập GitHub
+4. File → Clone Repository
+5. URL: https://github.com/lyonmartinez/thebesties.git
+6. Chọn folder: c:\Users\ADMID\Desktop\Website The Besties
+7. Bấm Clone
+8. GitHub Desktop sẽ tự động push code
+
+==============================================================================
+
+✅ KỲ VỌNG KẾT QUẢ:
+
+Sau khi push xong, bạn sẽ thấy files xuất hiện ở:
+https://github.com/lyonmartinez/thebesties
+
+==============================================================================
+
+📋 TIẾP THEO - ENABLE GITHUB PAGES:
+
+1. Vào: https://github.com/lyonmartinez/thebesties/settings/pages
+2. Chọn "Deploy from a branch"
+3. Branch: main
+4. Folder: / (root)
+5. Bấm Save
+
+==============================================================================
+
+🌐 WEBSITE SẼ CHẠY Ở:
+
+https://lyonmartinez.github.io/thebesties
+
+⏳ Chờ 1-2 phút để GitHub Pages build xong.
+
+==============================================================================
