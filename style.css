@@ -90,6 +90,15 @@ main {
   box-shadow: 0 8px 20px rgba(255, 96, 167, 0.7);
 }
 
+/* If logo image is used inside .logo-badge */
+.logo-img {
+  display: block;
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
 .logo-text {
   font-weight: 700;
   font-size: 18px;
