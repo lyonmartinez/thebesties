@@ -1314,6 +1314,17 @@ h1 {
   .member-profile-layout {
     grid-template-columns: 1fr;
     gap: 12px;
+    display: block; /* ensure stacking on very small screens */
+  }
+
+  /* Make sidebar and content full-width and remove internal scrolls */
+  .member-profile-meta,
+  .member-profile-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box;
+    overflow: visible !important;
+    -webkit-overflow-scrolling: auto;
   }
 
   .member-profile-meta {
