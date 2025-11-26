@@ -370,6 +370,56 @@
       </script>
     </main>
 
+    <!-- Lightbox modal for gallery images -->
+    <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog" aria-label="Image preview">
+      <div class="lightbox-inner" role="document">
+        <button class="lightbox-close" aria-label="Close">×</button>
+        <img src="" alt="" />
+        <figcaption></figcaption>
+      </div>
+    </div>
+
+    <script>
+      // Simple lightbox (no dependencies)
+      (function(){
+        var lightbox = document.getElementById('lightbox');
+        var lbImg = lightbox.querySelector('img');
+        var lbCaption = lightbox.querySelector('figcaption');
+        var closeBtn = lightbox.querySelector('.lightbox-close');
+
+        function openLightbox(src, alt, caption){
+          lbImg.src = src;
+          lbImg.alt = alt || '';
+          lbCaption.textContent = caption || '';
+          lightbox.setAttribute('aria-hidden','false');
+          lightbox.classList.add('open');
+          document.body.style.overflow = 'hidden';
+        }
+
+        function closeLightbox(){
+          lightbox.classList.remove('open');
+          lightbox.setAttribute('aria-hidden','true');
+          lbImg.src = '';
+          lbCaption.textContent = '';
+          document.body.style.overflow = '';
+        }
+
+        // Click thumbnails
+        document.addEventListener('click', function(e){
+          var fig = e.target.closest('.member-photo');
+          if(!fig) return;
+          var img = fig.querySelector('img');
+          if(!img) return;
+          e.preventDefault();
+          openLightbox(img.src, img.alt, fig.querySelector('figcaption') ? fig.querySelector('figcaption').textContent : '');
+        });
+
+        closeBtn.addEventListener('click', closeLightbox);
+        lightbox.addEventListener('click', function(e){ if(e.target === lightbox) closeLightbox(); });
+        document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLightbox(); });
+      })();
+    </script>
+
     <footer class="footer">
       <p>
         The Besties Gang • FiveM  

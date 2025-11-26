@@ -732,7 +732,7 @@ h1 {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 360px;
+  max-height: 480px;
   object-fit: cover;
 }
 
@@ -1406,7 +1406,7 @@ h1 {
   }
 
   .member-photo img {
-    height: 120px;
+    max-height: 240px;
   }
 
   .member-photo figcaption {
@@ -1595,8 +1595,57 @@ h1 {
   }
 
   .member-photo img {
-    height: 100px;
+    max-height: 160px;
   }
+}
+
+/* Lightbox styles */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.85);
+  z-index: 9999;
+  padding: 24px;
+}
+.lightbox.open {
+  display: flex;
+}
+.lightbox-inner {
+  position: relative;
+  max-width: 96vw;
+  max-height: 96vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.lightbox img {
+  max-width: 100%;
+  max-height: 86vh;
+  border-radius: 10px;
+  box-shadow: 0 18px 60px rgba(0,0,0,0.8);
+}
+.lightbox figcaption {
+  color: var(--text-muted);
+  font-size: 14px;
+  text-align: center;
+  max-width: 90vw;
+}
+.lightbox-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: rgba(255,255,255,0.06);
+  color: var(--text-main);
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 
