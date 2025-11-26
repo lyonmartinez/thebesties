@@ -82,21 +82,28 @@ main {
 
 .logo-badge {
   background: conic-gradient(from 120deg, #ffffff, #ff9fd8, #ff2b8a, #ffffff);
-  color: #1c0f24;
-  font-weight: 800;
-  font-size: 15px;
-  padding: 7px 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border-radius: 999px;
+  overflow: hidden;
   box-shadow: 0 8px 20px rgba(255, 96, 167, 0.7);
 }
 
 /* If logo image is used inside .logo-badge */
 .logo-img {
   display: block;
-  width: 36px;
-  height: 36px;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  border-radius: 8px;
+  background: transparent;
+}
+
+.logo-text {
+  margin-left: 10px;
 }
 
 .logo-text {
