@@ -76,18 +76,16 @@ main {
 
 .logo-badge {
   display: inline-block;
-  width: 48px;
+  width: auto;
   height: 48px;
-  border-radius: 50%;
+  border-radius: 0;
   background-color: transparent;
-  background-size: cover;
+  background-size: contain;
   background-position: center center;
   background-repeat: no-repeat;
-  box-shadow: 0 0 0 2px rgba(255,255,255,0.06) inset;
-  overflow: hidden;
-}
-.logo-img {
-  display: none;
+  box-shadow: none;
+  overflow: visible;
+  padding: 0 8px;
 }
 .logo-img {
   display: block;
