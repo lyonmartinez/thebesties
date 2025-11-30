@@ -81,12 +81,21 @@ GITHUB_TOKEN=your_github_token_here
 GITHUB_REPO=thebesties
 GITHUB_OWNER=lyonmartinez
 REPO_PATH=c:\Users\ADMID\Desktop\Website The Besties
+
+# Discord OAuth2 (Tùy chọn - Xem DISCORD_SETUP.md)
+DISCORD_CLIENT_ID=your_discord_client_id
+DISCORD_CLIENT_SECRET=your_discord_client_secret
+DISCORD_REDIRECT_URI=http://localhost:5000/dashboard/login.html
+
+# Discord Bot (Tùy chọn - Xem DISCORD_SETUP.md)
+DISCORD_BOT_TOKEN=your_discord_bot_token
 ```
 
 **Lưu ý:**
 - `JWT_SECRET`: Thay bằng một chuỗi bí mật dài hơn trong production
 - `GITHUB_TOKEN`: Tạo từ https://github.com/settings/tokens (cần repo access)
 - `REPO_PATH`: Đường dẫn tuyệt đối đến folder website
+- **Discord OAuth2 & Bot:** Xem hướng dẫn chi tiết trong `DISCORD_SETUP.md`
 
 ### 3. Chạy Backend
 
@@ -123,7 +132,9 @@ bcrypt.hash('your_password', 10).then(hash => console.log(hash));
 ## API Endpoints
 
 ### Authentication
-- `POST /api/auth/login` - Đăng nhập
+- `POST /api/auth/login` - Đăng nhập (Legacy - Username/Password)
+- `POST /api/auth/discord` - Đăng nhập bằng Discord OAuth2
+- `GET /api/auth/discord-config` - Lấy cấu hình Discord OAuth2
 - `GET /api/auth/me` - Lấy thông tin user hiện tại
 - `PUT /api/auth/profile` - Cập nhật profile
 

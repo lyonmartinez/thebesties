@@ -12,3 +12,5 @@ build/
 .env.local
 Thumbs.db
 .cache/
+logs/
+backend/logs/

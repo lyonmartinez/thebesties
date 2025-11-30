@@ -6,6 +6,17 @@ require('dotenv').config();
 const authRoutes = require('./routes/auth');
 const leaderRoutes = require('./routes/leader');
 
+// Initialize Discord Bot (if configured)
+let discordBot = null;
+if (process.env.DISCORD_BOT_TOKEN) {
+  try {
+    discordBot = require('./bot/bot');
+    console.log('🤖 Discord Bot đã được khởi động');
+  } catch (error) {
+    console.warn('⚠️  Không thể khởi động Discord Bot:', error.message);
+  }
+}
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -61,13 +72,20 @@ app.get('*', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 The Besties Backend running on http://localhost:${PORT}`);
   console.log(`📚 API docs:`);
-  console.log(`   POST /api/auth/login - Login`);
+  console.log(`   POST /api/auth/login - Login (Legacy)`);
+  console.log(`   POST /api/auth/discord - Discord OAuth2 Login`);
+  console.log(`   GET /api/auth/discord-config - Get Discord OAuth2 config`);
   console.log(`   GET /api/auth/me - Get current user`);
   console.log(`   PUT /api/auth/profile - Update profile`);
   console.log(`   GET /api/leader/members - Get all members (Leader only)`);
   console.log(`   POST /api/leader/members - Create member (Leader only)`);
   console.log(`   PUT /api/leader/members/:id - Update member (Leader only)`);
   console.log(`   DELETE /api/leader/members/:id - Delete member (Leader only)`);
+  if (discordBot) {
+    console.log(`🤖 Discord Bot: Đang hoạt động`);
+  } else {
+    console.log(`⚠️  Discord Bot: Chưa được cấu hình (DISCORD_BOT_TOKEN)`);
+  }
 });
 
 module.exports = app;

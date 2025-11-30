@@ -5,13 +5,22 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop thebesties-bot",
+    "pm2:restart": "pm2 restart thebesties-bot",
+    "pm2:delete": "pm2 delete thebesties-bot",
+    "pm2:logs": "pm2 logs thebesties-bot",
+    "pm2:status": "pm2 status",
+    "pm2:monit": "pm2 monit"
   },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",
     "bcryptjs": "^2.4.3",
     "jsonwebtoken": "^9.0.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "discord.js": "^14.14.1",
+    "axios": "^1.6.2"
   }
 }

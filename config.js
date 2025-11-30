@@ -25,7 +25,12 @@
     API_URL: API_BASE_URL,
     BASE_URL: BASE_URL,
     IS_PRODUCTION: isGitHubPages,
-    IS_LOCALHOST: !isGitHubPages
+    IS_LOCALHOST: !isGitHubPages,
+    // Discord config will be fetched from backend
+    DISCORD_CLIENT_ID: '',
+    DISCORD_REDIRECT_URI: isGitHubPages
+      ? 'https://lyonmartinez.github.io/thebesties/dashboard/login.html'
+      : 'http://localhost:5000/dashboard/login.html'
   };
 
   // Log config in development
