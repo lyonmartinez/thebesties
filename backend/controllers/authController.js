@@ -81,7 +81,7 @@ const getCurrentUser = (req, res) => {
 
 const updateMemberProfile = async (req, res) => {
   try {
-    const { name, character, bio } = req.body;
+    const { name, character, bio, avatar } = req.body;
     const users = loadUsers();
     const userIndex = users.users.findIndex(u => u.id === req.user.id);
 
@@ -92,6 +92,7 @@ const updateMemberProfile = async (req, res) => {
     if (name) users.users[userIndex].name = name;
     if (character) users.users[userIndex].character = character;
     if (bio) users.users[userIndex].bio = bio;
+    if (avatar) users.users[userIndex].avatar = avatar;
 
     saveUsers(users);
 
