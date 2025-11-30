@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng nhập - The Besties Gang Wiki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --pink: #ff5faf;
+      --pink-soft: #ffd0e8;
+      --pink-deep: #ff2b8a;
+      --bg: #05040a;
+      --text-main: #ffffff;
+      --text-muted: #c9c3cf;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: "Roboto", system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at top, #ffb3dd 0, #05040a 35%, #05040a 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .bg-blur {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(255, 182, 219, 0.3), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(255, 96, 167, 0.35), transparent 55%);
+      mix-blend-mode: screen;
+      opacity: 0.9;
+      z-index: -1;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+    }
+
+    .card {
+      background: rgba(17, 10, 23, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 22px;
+      padding: 32px 28px;
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    .logo-section {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo-img {
+      width: 80px;
+      height: auto;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 28px;
+      margin: 0 0 8px;
+      letter-spacing: 0.03em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    input {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(5, 0, 10, 0.5);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      transition: 0.18s ease;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: rgba(255, 96, 167, 0.6);
+      background: rgba(5, 0, 10, 0.8);
+      box-shadow: 0 0 0 3px rgba(255, 96, 167, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 11px 20px;
+      border-radius: 12px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.18s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+      color: #160614;
+      box-shadow: 0 14px 30px rgba(255, 96, 167, 0.7);
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 40px rgba(255, 96, 167, 0.9);
+    }
+
+    .btn.primary:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .error-message {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      color: #ff6b6b;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .error-message.show {
+      display: block;
+    }
+
+    .success-message {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid rgba(0, 255, 0, 0.3);
+      color: #51cf66;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .info-section {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .info-section p {
+      margin: 0 0 6px;
+    }
+
+    .info-section strong {
+      color: var(--pink-soft);
+    }
+
+    .loading {
+      display: none;
+    }
+
+    .loading.show {
+      display: inline-block;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 16px;
+      }
+
+      .card {
+        padding: 20px 16px;
+      }
+
+      h1 {
+        font-size: 22px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blur"></div>
+
+  <div class="container">
+    <div class="card">
+      <div class="logo-section">
+        <img src="../images/logo_thebesties.png" alt="The Besties Logo" class="logo-img" />
+        <h1>Đăng nhập</h1>
+        <p class="subtitle">Cộng đồng The Besties Gang</p>
+      </div>
+
+      <div class="error-message" id="errorMessage"></div>
+      <div class="success-message" id="successMessage"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="username">Tên đăng nhập</label>
+          <input type="text" id="username" name="username" placeholder="username" required />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Mật khẩu</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" required />
+        </div>
+
+        <button type="submit" class="btn primary">
+          <span class="loading" id="loading">⏳</span>
+          <span>Đăng nhập</span>
+        </button>
+      </form>
+
+      <div class="info-section">
+        <p>Quên mật khẩu? Liên hệ <strong>Leader</strong> để cấp lại.</p>
+        <p style="margin-top: 12px; font-size: 11px; color: var(--text-muted);">
+          © 2025 The Besties Gang • FiveM
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'http://localhost:5000/api';
+
+    const form = document.getElementById('loginForm');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+    const loading = document.getElementById('loading');
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('show');
+      successMessage.classList.remove('show');
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.add('show');
+      errorMessage.classList.remove('show');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorMessage.classList.remove('show');
+      successMessage.classList.remove('show');
+
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!username || !password) {
+        showError('Vui lòng nhập tên đăng nhập và mật khẩu');
+        return;
+      }
+
+      loading.classList.add('show');
+      form.querySelector('button').disabled = true;
+
+      try {
+        const response = await fetch(`${API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Đăng nhập thất bại');
+          return;
+        }
+
+        // Save token
+        localStorage.setItem('auth_token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
+
+        showSuccess('Đăng nhập thành công! Chuyển hướng...');
+
+        // Redirect based on role
+        setTimeout(() => {
+          if (data.user.role === 'leader') {
+            window.location.href = './leader-dashboard.html';
+          } else {
+            window.location.href = './member-dashboard.html';
+          }
+        }, 1500);
+      } catch (error) {
+        showError('Lỗi kết nối: ' + error.message);
+      } finally {
+        loading.classList.remove('show');
+        form.querySelector('button').disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

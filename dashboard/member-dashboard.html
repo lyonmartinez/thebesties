@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hồ sơ của tôi - The Besties Gang Wiki</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../style.css" />
+  <style>
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #ff5faf, #ff2b8a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .user-details h3 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .user-details p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.3);
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.18s ease;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .form-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: 22px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .form-section h2 {
+      margin-top: 0;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-row.full {
+      grid-template-columns: 1fr;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .form-group input,
+    .form-group textarea {
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(5, 0, 10, 0.5);
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 14px;
+      transition: 0.18s ease;
+    }
+
+    .form-group textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: rgba(255, 96, 167, 0.6);
+      background: rgba(5, 0, 10, 0.8);
+      box-shadow: 0 0 0 3px rgba(255, 96, 167, 0.1);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 12px;
+      border: none;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.18s ease;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--pink), var(--pink-deep));
+      color: #160614;
+      flex: 1;
+    }
+
+    .btn.primary:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn.secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-main);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    .btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .message {
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      background: rgba(255, 0, 0, 0.1);
+      border: 1px solid rgba(255, 0, 0, 0.3);
+      color: #ff6b6b;
+    }
+
+    .message.success {
+      background: rgba(0, 255, 0, 0.1);
+      border: 1px solid rgba(0, 255, 0, 0.3);
+      color: #51cf66;
+    }
+
+    @media (max-width: 640px) {
+      .dashboard-header {
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blur"></div>
+
+  <header class="topbar">
+    <div class="logo">
+      <img class="logo-badge" src="../images/logo_thebesties.png" alt="The Besties Logo" />
+      <span class="logo-text">The Besties Wiki</span>
+    </div>
+    <div class="security-badge">🔒 Chính thức</div>
+  </header>
+
+  <main style="max-width: 900px; margin: 20px auto;">
+    <div class="dashboard-header">
+      <h1>Hồ sơ của tôi</h1>
+      <div class="user-info">
+        <div class="user-avatar" id="avatar">A</div>
+        <div class="user-details">
+          <h3 id="userName">Loading...</h3>
+          <p id="userRole">Thành viên</p>
+        </div>
+        <button class="logout-btn" id="logoutBtn">Đăng xuất</button>
+      </div>
+    </div>
+
+    <div id="errorMessage" class="message error"></div>
+    <div id="successMessage" class="message success"></div>
+
+    <div class="form-section">
+      <h2>Chỉnh sửa hồ sơ</h2>
+
+      <form id="profileForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Tên</label>
+            <input type="text" id="name" name="name" required />
+          </div>
+          <div class="form-group">
+            <label for="character">Nhân vật / Vai trò</label>
+            <input type="text" id="character" name="character" placeholder="Ví dụ: Xạ thủ / Hậu cần" />
+          </div>
+        </div>
+
+        <div class="form-row full">
+          <div class="form-group">
+            <label for="bio">Tiểu sử / Giới thiệu</label>
+            <textarea id="bio" name="bio" placeholder="Viết về chuyện của bạn trong gang..."></textarea>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn primary" id="saveBtn">Lưu thay đổi</button>
+          <button type="button" class="btn secondary" onclick="window.location.href='../index.html'">Quay lại trang chủ</button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>
+      The Besties Gang • FiveM  
+      <span class="footer-sub">Màu hồng nhưng không yếu đuối.</span>
+    </p>
+  </footer>
+
+  <script>
+    const API_URL = 'http://localhost:5000/api';
+    const form = document.getElementById('profileForm');
+    const errorMessage = document.getElementById('errorMessage');
+    const successMessage = document.getElementById('successMessage');
+
+    function showError(message) {
+      errorMessage.textContent = message;
+      errorMessage.classList.add('show');
+      successMessage.classList.remove('show');
+    }
+
+    function showSuccess(message) {
+      successMessage.textContent = message;
+      successMessage.classList.add('show');
+      errorMessage.classList.remove('show');
+    }
+
+    function checkAuth() {
+      const token = localStorage.getItem('auth_token');
+      if (!token) {
+        window.location.href = './login.html';
+        return null;
+      }
+      return token;
+    }
+
+    async function loadUserProfile() {
+      const token = checkAuth();
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${API_URL}/auth/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to load profile');
+        }
+
+        const user = await response.json();
+        document.getElementById('userName').textContent = user.name;
+        document.getElementById('avatar').textContent = user.name.charAt(0).toUpperCase();
+        document.getElementById('name').value = user.name;
+        document.getElementById('character').value = user.character || '';
+        document.getElementById('bio').value = user.bio || '';
+      } catch (error) {
+        showError('Lỗi tải hồ sơ: ' + error.message);
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = checkAuth();
+      if (!token) return;
+
+      const saveBtn = document.getElementById('saveBtn');
+      saveBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_URL}/auth/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: document.getElementById('name').value,
+            character: document.getElementById('character').value,
+            bio: document.getElementById('bio').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Cập nhật thất bại');
+          return;
+        }
+
+        showSuccess('Hồ sơ cập nhật thành công!');
+      } catch (error) {
+        showError('Lỗi: ' + error.message);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user');
+      window.location.href = './login.html';
+    });
+
+    loadUserProfile();
+  </script>
+</body>
+</html>
