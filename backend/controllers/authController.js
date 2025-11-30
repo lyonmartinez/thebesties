@@ -206,10 +206,151 @@ const getDiscordConfig = (req, res) => {
   }
 };
 
+// Verification code storage (in-memory, expires after 5 minutes)
+const verificationCodes = new Map();
+
+// Generate random verification code
+const generateVerificationCode = () => {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+};
+
+// Create verification code for Discord bot login
+const createVerificationCode = (req, res) => {
+  try {
+    const code = generateVerificationCode();
+    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+
+    verificationCodes.set(code, {
+      expiresAt,
+      verified: false,
+      discordId: null,
+      userId: null
+    });
+
+    // Clean up expired codes
+    setTimeout(() => {
+      if (verificationCodes.has(code)) {
+        verificationCodes.delete(code);
+      }
+    }, 5 * 60 * 1000);
+
+    res.json({
+      success: true,
+      code,
+      expiresIn: 300, // 5 minutes in seconds
+      message: 'Gửi code này cho bot Discord để đăng nhập'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Verify code with Discord ID (called by bot)
+const verifyCode = (code, discordId) => {
+  const verification = verificationCodes.get(code);
+  
+  if (!verification) {
+    return { success: false, error: 'Code không hợp lệ hoặc đã hết hạn' };
+  }
+
+  if (Date.now() > verification.expiresAt) {
+    verificationCodes.delete(code);
+    return { success: false, error: 'Code đã hết hạn' };
+  }
+
+  if (verification.verified) {
+    return { success: false, error: 'Code đã được sử dụng' };
+  }
+
+  // Find user by Discord ID
+  const users = loadUsers();
+  const user = users.users.find(u => u.discordId === discordId);
+
+  if (!user) {
+    return { success: false, error: 'Discord ID không được đăng ký trong hệ thống' };
+  }
+
+  // Mark as verified
+  verification.verified = true;
+  verification.discordId = discordId;
+  verification.userId = user.id;
+  verification.user = user;
+
+  return { success: true, user };
+};
+
+// Check verification status (polling from frontend)
+const checkVerification = (req, res) => {
+  try {
+    const { code } = req.query;
+
+    if (!code) {
+      return res.status(400).json({ error: 'Verification code required' });
+    }
+
+    const verification = verificationCodes.get(code);
+
+    if (!verification) {
+      return res.status(404).json({ error: 'Code không hợp lệ hoặc đã hết hạn' });
+    }
+
+    if (Date.now() > verification.expiresAt) {
+      verificationCodes.delete(code);
+      return res.status(410).json({ error: 'Code đã hết hạn' });
+    }
+
+    if (verification.verified && verification.user) {
+      // Generate JWT token
+      const token = jwt.sign(
+        { 
+          id: verification.user.id, 
+          username: verification.user.username, 
+          role: verification.user.role, 
+          name: verification.user.name, 
+          discordId: verification.user.discordId 
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRE }
+      );
+
+      // Clean up code
+      verificationCodes.delete(code);
+
+      return res.json({
+        success: true,
+        verified: true,
+        token,
+        user: {
+          id: verification.user.id,
+          username: verification.user.username,
+          name: verification.user.name,
+          role: verification.user.role,
+          email: verification.user.email,
+          discordId: verification.user.discordId,
+          discordUsername: verification.user.discordUsername,
+          discordAvatar: verification.user.discordAvatar
+        }
+      });
+    }
+
+    // Not verified yet
+    res.json({
+      success: true,
+      verified: false,
+      message: 'Đang chờ xác thực từ bot Discord...'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   login,
   discordLogin,
   getDiscordConfig,
   getCurrentUser,
-  updateMemberProfile
+  updateMemberProfile,
+  createVerificationCode,
+  checkVerification,
+  verifyCode
 };

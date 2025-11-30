@@ -471,7 +471,7 @@
       <div class="message error-message" id="errorMessage"></div>
       <div class="message success-message" id="successMessage"></div>
 
-      <!-- Discord OAuth2 Login -->
+      <!-- Discord Bot Verification Login -->
       <div id="discordLoginSection">
         <button type="button" id="discordLoginBtn" class="btn discord-btn">
           <svg width="20" height="20" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
@@ -479,6 +479,24 @@
           </svg>
           <span id="discordBtnText">Đăng nhập với Discord</span>
         </button>
+        
+        <!-- Verification Code Display -->
+        <div id="verificationSection" style="display: none; margin-top: 24px; padding: 20px; background: rgba(88, 101, 242, 0.1); border-radius: 14px; border: 1.5px solid rgba(88, 101, 242, 0.3);">
+          <p style="margin: 0 0 16px; font-size: 14px; color: var(--text-main); text-align: center;">
+            📱 <strong>Gửi code này cho bot Discord qua tin nhắn riêng (DM):</strong>
+          </p>
+          <div style="text-align: center; margin-bottom: 16px;">
+            <div id="verificationCode" style="font-size: 32px; font-weight: 700; letter-spacing: 8px; color: #5865F2; font-family: 'Courier New', monospace; padding: 16px; background: rgba(0, 0, 0, 0.3); border-radius: 12px; display: inline-block; margin: 0 auto;"></div>
+          </div>
+          <p style="margin: 0; font-size: 12px; color: var(--text-muted); text-align: center; line-height: 1.6;">
+            💬 Mở Discord → Tìm bot "The Besties Bot" → Gửi tin nhắn riêng với code trên<br>
+            ⏱️ Code có hiệu lực trong <span id="countdown">5:00</span> phút
+          </p>
+          <div id="verificationStatus" style="margin-top: 16px; text-align: center; font-size: 13px; color: var(--text-muted);">
+            ⏳ Đang chờ xác thực...
+          </div>
+        </div>
+        
         <div class="divider">
           <span>hoặc</span>
         </div>
@@ -551,151 +569,137 @@
       }, 100);
     }
 
-    // Discord OAuth2 Login
+    // Discord Bot Verification Login
     const discordLoginBtn = document.getElementById('discordLoginBtn');
     const discordBtnText = document.getElementById('discordBtnText');
+    const verificationSection = document.getElementById('verificationSection');
+    const verificationCode = document.getElementById('verificationCode');
+    const verificationStatus = document.getElementById('verificationStatus');
+    const countdownElement = document.getElementById('countdown');
+    
+    let verificationCodeValue = null;
+    let verificationInterval = null;
+    let countdownInterval = null;
+    let countdownSeconds = 300; // 5 minutes
 
-    // Get Discord config from backend
-    async function getDiscordConfig() {
-      try {
-        const response = await fetch(`${API_URL}/auth/discord-config`);
-        if (response.ok) {
-          const config = await response.json();
-          DISCORD_CLIENT_ID = config.clientId;
-          DISCORD_REDIRECT_URI = config.redirectUri;
+    // Format countdown time
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    // Start countdown
+    function startCountdown() {
+      countdownSeconds = 300;
+      countdownElement.textContent = formatTime(countdownSeconds);
+      
+      if (countdownInterval) clearInterval(countdownInterval);
+      
+      countdownInterval = setInterval(() => {
+        countdownSeconds--;
+        countdownElement.textContent = formatTime(countdownSeconds);
+        
+        if (countdownSeconds <= 0) {
+          clearInterval(countdownInterval);
+          verificationStatus.textContent = '❌ Code đã hết hạn. Vui lòng tạo code mới.';
+          verificationStatus.style.color = '#ff8a8a';
+          if (verificationInterval) clearInterval(verificationInterval);
         }
+      }, 1000);
+    }
+
+    // Check verification status
+    async function checkVerificationStatus() {
+      if (!verificationCodeValue) return;
+
+      try {
+        const response = await fetch(`${API_URL}/auth/discord/check-verification?code=${verificationCodeValue}`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await response.json();
+
+        if (data.success && data.verified) {
+          // Verification successful!
+          clearInterval(verificationInterval);
+          clearInterval(countdownInterval);
+          
+          // Save token and user data
+          localStorage.setItem('auth_token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+
+          verificationStatus.textContent = '✅ Xác thực thành công! Đang chuyển hướng...';
+          verificationStatus.style.color = '#6ee7a0';
+          showSuccess('✅ Đăng nhập thành công! Chuyển hướng...');
+
+          // Redirect based on role
+          setTimeout(() => {
+            if (data.user.role === 'leader') {
+              window.location.href = './leader-dashboard.html';
+            } else {
+              window.location.href = './member-dashboard.html';
+            }
+          }, 1200);
+        } else if (data.error) {
+          // Error occurred
+          clearInterval(verificationInterval);
+          clearInterval(countdownInterval);
+          verificationStatus.textContent = '❌ ' + data.error;
+          verificationStatus.style.color = '#ff8a8a';
+          showError('❌ ' + data.error);
+        }
+        // Otherwise, still waiting...
       } catch (error) {
-        console.warn('Could not fetch Discord config:', error);
+        console.error('Error checking verification:', error);
+        // Don't show error, just keep polling
       }
     }
 
-    // Initialize Discord config
-    getDiscordConfig();
-
+    // Create verification code
     discordLoginBtn.addEventListener('click', async () => {
       try {
-        // Get config from backend if not set
-        if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
-          await getDiscordConfig();
-        }
-
-        if (!DISCORD_CLIENT_ID) {
-          showError('❌ Discord OAuth2 chưa được cấu hình. Vui lòng liên hệ quản trị viên.');
-          return;
-        }
-
-        discordBtnText.textContent = 'Đang chuyển hướng...';
+        discordBtnText.textContent = 'Đang tạo code...';
         discordLoginBtn.disabled = true;
+        errorMessage.classList.remove('show');
+        successMessage.classList.remove('show');
 
-        // Build Discord OAuth2 URL
-        const discordAuthUrl = `https://discord.com/api/oauth2/authorize?` +
-          `client_id=${encodeURIComponent(DISCORD_CLIENT_ID)}&` +
-          `redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&` +
-          `response_type=code&` +
-          `scope=identify%20email`;
+        const response = await fetch(`${API_URL}/auth/discord/verify-code`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
 
-        // Redirect to Discord OAuth2
-        window.location.href = discordAuthUrl;
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          throw new Error(data.error || 'Không thể tạo verification code');
+        }
+
+        // Show verification section
+        verificationCodeValue = data.code;
+        verificationCode.textContent = data.code;
+        verificationSection.style.display = 'block';
+        verificationStatus.textContent = '⏳ Đang chờ xác thực...';
+        verificationStatus.style.color = 'var(--text-muted)';
+
+        // Start countdown
+        startCountdown();
+
+        // Start polling for verification
+        if (verificationInterval) clearInterval(verificationInterval);
+        verificationInterval = setInterval(checkVerificationStatus, 2000); // Check every 2 seconds
+
+        // Scroll to verification section
+        verificationSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
       } catch (error) {
         console.error('Discord login error:', error);
-        showError('❌ Lỗi khi khởi tạo đăng nhập Discord. Vui lòng thử lại.');
+        showError('❌ Lỗi khi tạo verification code. Vui lòng thử lại.');
         discordBtnText.textContent = 'Đăng nhập với Discord';
         discordLoginBtn.disabled = false;
       }
     });
-
-    // Handle Discord OAuth2 callback
-    const urlParams = new URLSearchParams(window.location.search);
-    const discordCode = urlParams.get('code');
-    const discordError = urlParams.get('error');
-
-    if (discordError) {
-      showError('❌ Đăng nhập Discord bị hủy hoặc có lỗi xảy ra.');
-      // Clean URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-
-    if (discordCode) {
-      // Exchange code for token
-      discordBtnText.textContent = 'Đang xác thực...';
-      discordLoginBtn.disabled = true;
-      errorMessage.classList.remove('show');
-      successMessage.classList.remove('show');
-
-      try {
-        const response = await fetch(`${API_URL}/auth/discord`, {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify({ code: discordCode }),
-          credentials: 'omit'
-        });
-
-        const contentType = response.headers.get('content-type');
-        let data;
-        
-        if (contentType && contentType.includes('application/json')) {
-          data = await response.json();
-        } else {
-          const text = await response.text();
-          console.error('Non-JSON response:', text);
-          throw new Error('Server trả về định dạng không hợp lệ');
-        }
-
-        if (!response.ok) {
-          const errorMsg = data.error || data.message || 'Đăng nhập thất bại';
-          showError('❌ ' + errorMsg);
-          // Clean URL
-          window.history.replaceState({}, document.title, window.location.pathname);
-          discordBtnText.textContent = 'Đăng nhập với Discord';
-          discordLoginBtn.disabled = false;
-          return;
-        }
-
-        // Check if response has required fields
-        if (!data.token || !data.user) {
-          showError('❌ Phản hồi từ server không hợp lệ');
-          window.history.replaceState({}, document.title, window.location.pathname);
-          discordBtnText.textContent = 'Đăng nhập với Discord';
-          discordLoginBtn.disabled = false;
-          return;
-        }
-
-        // Save token and user data
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
-
-        showSuccess('✅ Đăng nhập thành công! Chuyển hướng...');
-
-        // Clean URL
-        window.history.replaceState({}, document.title, window.location.pathname);
-
-        // Redirect based on role
-        setTimeout(() => {
-          if (data.user.role === 'leader') {
-            window.location.href = './leader-dashboard.html';
-          } else {
-            window.location.href = './member-dashboard.html';
-          }
-        }, 1200);
-      } catch (error) {
-        console.error('Discord callback error:', error);
-        let errorMsg = '';
-        
-        if (error.message === 'Failed to fetch' || error.message.includes('fetch') || error.name === 'TypeError') {
-          errorMsg = '❌ Không thể kết nối đến server. Vui lòng kiểm tra backend server.';
-        } else {
-          errorMsg = '❌ Lỗi: ' + error.message;
-        }
-        
-        showError(errorMsg);
-        window.history.replaceState({}, document.title, window.location.pathname);
-        discordBtnText.textContent = 'Đăng nhập với Discord';
-        discordLoginBtn.disabled = false;
-      }
-    }
 
     const form = document.getElementById('loginForm');
     const usernameInput = document.getElementById('username');

@@ -2,6 +2,7 @@ const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, EmbedBuild
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
+const { verifyCode } = require('../controllers/authController');
 
 const usersPath = path.join(__dirname, '../data/users.json');
 
@@ -20,6 +21,7 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.DirectMessages, // For DM verification
   ],
 });
 
@@ -73,6 +75,54 @@ if (process.env.DISCORD_BOT_TOKEN && process.env.DISCORD_CLIENT_ID) {
 client.once('ready', () => {
   console.log(`🤖 Bot Discord "${client.user.tag}" đã sẵn sàng!`);
   console.log(`📊 Bot đang hoạt động trên ${client.guilds.cache.size} server(s)`);
+});
+
+// Handle DM messages for verification
+client.on('messageCreate', async message => {
+  // Only handle DMs (not in guild)
+  if (message.guild || message.author.bot) return;
+
+  const content = message.content.trim().toUpperCase();
+  
+  // Check if message looks like a verification code (6 characters, alphanumeric)
+  if (/^[A-Z0-9]{6}$/.test(content)) {
+    try {
+      const result = verifyCode(content, message.author.id);
+
+      if (result.success) {
+        // Update Discord info in users.json
+        const users = loadUsers();
+        const userIndex = users.users.findIndex(u => u.id === result.user.id);
+        
+        if (userIndex !== -1) {
+          users.users[userIndex].discordUsername = message.author.username;
+          users.users[userIndex].discordAvatar = message.author.displayAvatarURL({ dynamic: true });
+          saveUsers(users);
+        }
+
+        const embed = new EmbedBuilder()
+          .setColor(0x51CF66)
+          .setTitle('✅ Xác thực thành công!')
+          .setDescription(`Bạn đã đăng nhập thành công với tài khoản **${result.user.name}**.\n\nQuay lại trang web để tiếp tục.`)
+          .setFooter({ text: 'The Besties Gang • FiveM' })
+          .setTimestamp();
+
+        await message.reply({ embeds: [embed] });
+      } else {
+        const embed = new EmbedBuilder()
+          .setColor(0xFF5FAF)
+          .setTitle('❌ Xác thực thất bại')
+          .setDescription(result.error || 'Code không hợp lệ')
+          .setFooter({ text: 'The Besties Gang • FiveM' })
+          .setTimestamp();
+
+        await message.reply({ embeds: [embed] });
+      }
+    } catch (error) {
+      console.error('Lỗi xử lý verification code:', error);
+      await message.reply('❌ Đã xảy ra lỗi khi xử lý code. Vui lòng thử lại sau.');
+    }
+  }
 });
 
 // Handle slash commands

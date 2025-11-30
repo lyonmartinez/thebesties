@@ -75,6 +75,8 @@ app.listen(PORT, () => {
   console.log(`   POST /api/auth/login - Login (Legacy)`);
   console.log(`   POST /api/auth/discord - Discord OAuth2 Login`);
   console.log(`   GET /api/auth/discord-config - Get Discord OAuth2 config`);
+  console.log(`   POST /api/auth/discord/verify-code - Create Discord bot verification code`);
+  console.log(`   GET /api/auth/discord/check-verification - Check verification status`);
   console.log(`   GET /api/auth/me - Get current user`);
   console.log(`   PUT /api/auth/profile - Update profile`);
   console.log(`   GET /api/leader/members - Get all members (Leader only)`);
