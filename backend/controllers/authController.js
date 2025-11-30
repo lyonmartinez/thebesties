@@ -206,8 +206,44 @@ const getDiscordConfig = (req, res) => {
   }
 };
 
-// Verification code storage (in-memory, expires after 5 minutes)
-const verificationCodes = new Map();
+// Verification code storage (file-based, shared between server and bot)
+const verificationCodesPath = path.join(__dirname, '../data/verification-codes.json');
+
+// Load verification codes from file
+const loadVerificationCodes = () => {
+  try {
+    if (fs.existsSync(verificationCodesPath)) {
+      const data = fs.readFileSync(verificationCodesPath, 'utf-8');
+      return JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('Error loading verification codes:', error);
+  }
+  return {};
+};
+
+// Save verification codes to file
+const saveVerificationCodes = (codes) => {
+  try {
+    // Clean up expired codes before saving
+    const now = Date.now();
+    const cleanedCodes = {};
+    for (const [code, data] of Object.entries(codes)) {
+      if (data.expiresAt > now) {
+        cleanedCodes[code] = data;
+      }
+    }
+    fs.writeFileSync(verificationCodesPath, JSON.stringify(cleanedCodes, null, 2));
+  } catch (error) {
+    console.error('Error saving verification codes:', error);
+  }
+};
+
+// Clean up expired codes periodically
+setInterval(() => {
+  const codes = loadVerificationCodes();
+  saveVerificationCodes(codes); // This will clean up expired codes
+}, 60000); // Every minute
 
 // Generate random verification code
 const generateVerificationCode = () => {
@@ -220,19 +256,16 @@ const createVerificationCode = (req, res) => {
     const code = generateVerificationCode();
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
 
-    verificationCodes.set(code, {
+    const codes = loadVerificationCodes();
+    codes[code] = {
       expiresAt,
       verified: false,
       discordId: null,
       userId: null
-    });
+    };
+    saveVerificationCodes(codes);
 
-    // Clean up expired codes
-    setTimeout(() => {
-      if (verificationCodes.has(code)) {
-        verificationCodes.delete(code);
-      }
-    }, 5 * 60 * 1000);
+    console.log(`✅ Verification code created: ${code} (expires in 5 minutes)`);
 
     res.json({
       success: true,
@@ -241,42 +274,57 @@ const createVerificationCode = (req, res) => {
       message: 'Gửi code này cho bot Discord để đăng nhập'
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('❌ Error creating verification code:', error);
+    res.status(500).json({ error: error.message || 'Lỗi khi tạo verification code' });
   }
 };
 
 // Verify code with Discord ID (called by bot)
 const verifyCode = (code, discordId) => {
-  const verification = verificationCodes.get(code);
-  
-  if (!verification) {
-    return { success: false, error: 'Code không hợp lệ hoặc đã hết hạn' };
+  try {
+    console.log(`🔍 Verifying code: ${code} for Discord ID: ${discordId}`);
+    const codes = loadVerificationCodes();
+    const verification = codes[code];
+    
+    if (!verification) {
+      console.log(`❌ Code ${code} not found in verification codes`);
+      return { success: false, error: 'Code không hợp lệ hoặc đã hết hạn' };
+    }
+
+    if (Date.now() > verification.expiresAt) {
+      delete codes[code];
+      saveVerificationCodes(codes);
+      console.log(`❌ Code ${code} has expired`);
+      return { success: false, error: 'Code đã hết hạn' };
+    }
+
+    if (verification.verified) {
+      console.log(`❌ Code ${code} already verified`);
+      return { success: false, error: 'Code đã được sử dụng' };
+    }
+
+    // Find user by Discord ID
+    const users = loadUsers();
+    const user = users.users.find(u => u.discordId === discordId);
+
+    if (!user) {
+      console.log(`❌ Discord ID ${discordId} not found in users`);
+      return { success: false, error: 'Discord ID không được đăng ký trong hệ thống' };
+    }
+
+    // Mark as verified
+    verification.verified = true;
+    verification.discordId = discordId;
+    verification.userId = user.id;
+    codes[code] = verification;
+    saveVerificationCodes(codes);
+
+    console.log(`✅ Code ${code} verified successfully for user: ${user.name}`);
+    return { success: true, user };
+  } catch (error) {
+    console.error('❌ Error verifying code:', error);
+    return { success: false, error: 'Lỗi khi xác thực code' };
   }
-
-  if (Date.now() > verification.expiresAt) {
-    verificationCodes.delete(code);
-    return { success: false, error: 'Code đã hết hạn' };
-  }
-
-  if (verification.verified) {
-    return { success: false, error: 'Code đã được sử dụng' };
-  }
-
-  // Find user by Discord ID
-  const users = loadUsers();
-  const user = users.users.find(u => u.discordId === discordId);
-
-  if (!user) {
-    return { success: false, error: 'Discord ID không được đăng ký trong hệ thống' };
-  }
-
-  // Mark as verified
-  verification.verified = true;
-  verification.discordId = discordId;
-  verification.userId = user.id;
-  verification.user = user;
-
-  return { success: true, user };
 };
 
 // Check verification status (polling from frontend)
@@ -288,47 +336,58 @@ const checkVerification = (req, res) => {
       return res.status(400).json({ error: 'Verification code required' });
     }
 
-    const verification = verificationCodes.get(code);
+    const codes = loadVerificationCodes();
+    const verification = codes[code];
 
     if (!verification) {
       return res.status(404).json({ error: 'Code không hợp lệ hoặc đã hết hạn' });
     }
 
     if (Date.now() > verification.expiresAt) {
-      verificationCodes.delete(code);
+      delete codes[code];
+      saveVerificationCodes(codes);
       return res.status(410).json({ error: 'Code đã hết hạn' });
     }
 
-    if (verification.verified && verification.user) {
+    if (verification.verified && verification.userId) {
+      // Load user data
+      const users = loadUsers();
+      const user = users.users.find(u => u.id === verification.userId);
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
       // Generate JWT token
       const token = jwt.sign(
         { 
-          id: verification.user.id, 
-          username: verification.user.username, 
-          role: verification.user.role, 
-          name: verification.user.name, 
-          discordId: verification.user.discordId 
+          id: user.id, 
+          username: user.username, 
+          role: user.role, 
+          name: user.name, 
+          discordId: user.discordId 
         },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRE }
       );
 
       // Clean up code
-      verificationCodes.delete(code);
+      delete codes[code];
+      saveVerificationCodes(codes);
 
       return res.json({
         success: true,
         verified: true,
         token,
         user: {
-          id: verification.user.id,
-          username: verification.user.username,
-          name: verification.user.name,
-          role: verification.user.role,
-          email: verification.user.email,
-          discordId: verification.user.discordId,
-          discordUsername: verification.user.discordUsername,
-          discordAvatar: verification.user.discordAvatar
+          id: user.id,
+          username: user.username,
+          name: user.name,
+          role: user.role,
+          email: user.email,
+          discordId: user.discordId,
+          discordUsername: user.discordUsername,
+          discordAvatar: user.discordAvatar
         }
       });
     }
@@ -340,6 +399,7 @@ const checkVerification = (req, res) => {
       message: 'Đang chờ xác thực từ bot Discord...'
     });
   } catch (error) {
+    console.error('Error checking verification:', error);
     res.status(500).json({ error: error.message });
   }
 };

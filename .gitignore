@@ -14,3 +14,5 @@ Thumbs.db
 .cache/
 logs/
 backend/logs/
+backend/data/
+verification-codes.json
