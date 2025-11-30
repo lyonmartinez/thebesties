@@ -34,6 +34,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      width: 100%;
     }
 
     .bg-blur {
@@ -57,10 +58,14 @@
 
     .container {
       width: 100%;
-      max-width: 480px;
-      padding: 24px;
+      height: 100vh;
+      max-width: none;
+      padding: 0;
       position: relative;
       z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card {
@@ -77,6 +82,9 @@
       backdrop-filter: blur(20px);
       position: relative;
       overflow: hidden;
+      width: 100%;
+      max-width: 480px;
+      min-height: auto;
     }
 
     .card::before {
