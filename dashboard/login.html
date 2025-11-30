@@ -425,8 +425,8 @@
         <p class="subtitle">Cộng đồng The Besties Gang</p>
       </div>
 
-      <div class="error-message" id="errorMessage"></div>
-      <div class="success-message" id="successMessage"></div>
+      <div class="message error-message" id="errorMessage"></div>
+      <div class="message success-message" id="successMessage"></div>
 
       <form id="loginForm">
         <div class="form-group">
@@ -470,8 +470,23 @@
   </div>
 
   <script>
-    // API URL from config (auto-detects GitHub Pages vs localhost)
-    const API_URL = window.APP_CONFIG?.API_URL || 'http://localhost:5000/api';
+    // Wait for config to load
+    let API_URL = 'http://localhost:5000/api';
+    
+    // Check if config is loaded
+    if (window.APP_CONFIG && window.APP_CONFIG.API_URL) {
+      API_URL = window.APP_CONFIG.API_URL;
+    } else {
+      // Wait a bit for config.js to load
+      setTimeout(() => {
+        if (window.APP_CONFIG && window.APP_CONFIG.API_URL) {
+          API_URL = window.APP_CONFIG.API_URL;
+          console.log('✅ Config loaded:', API_URL);
+        } else {
+          console.warn('⚠️ Config not loaded, using default:', API_URL);
+        }
+      }, 100);
+    }
 
     const form = document.getElementById('loginForm');
     const usernameInput = document.getElementById('username');
@@ -495,6 +510,45 @@
       errorMessage.classList.remove('show');
     }
 
+    // Validate username and password
+    function validateInputs() {
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
+      // Clear previous errors
+      usernameInput.style.borderColor = '';
+      passwordInput.style.borderColor = '';
+
+      let isValid = true;
+      let errors = [];
+
+      if (!username) {
+        usernameInput.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+        errors.push('Tên đăng nhập không được để trống');
+        isValid = false;
+      } else if (username.length < 3) {
+        usernameInput.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+        errors.push('Tên đăng nhập phải có ít nhất 3 ký tự');
+        isValid = false;
+      }
+
+      if (!password) {
+        passwordInput.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+        errors.push('Mật khẩu không được để trống');
+        isValid = false;
+      } else if (password.length < 4) {
+        passwordInput.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+        errors.push('Mật khẩu phải có ít nhất 4 ký tự');
+        isValid = false;
+      }
+
+      if (!isValid) {
+        showError('⚠️ ' + errors.join('<br>'));
+      }
+
+      return isValid;
+    }
+
     // Enter key to submit
     [usernameInput, passwordInput].forEach(input => {
       input.addEventListener('keypress', (e) => {
@@ -502,38 +556,88 @@
       });
     });
 
+    // Test backend connection (optional - can be used for pre-check)
+    async function testBackendConnection() {
+      try {
+        const response = await fetch(`${API_URL}/health`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        return response.ok;
+      } catch (error) {
+        return false;
+      }
+    }
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMessage.classList.remove('show');
       successMessage.classList.remove('show');
 
-      const username = usernameInput.value.trim();
-      const password = passwordInput.value;
-
-      if (!username || !password) {
-        showError('⚠️ Vui lòng nhập tên đăng nhập và mật khẩu');
+      // Validate inputs first
+      if (!validateInputs()) {
         return;
       }
 
+      const username = usernameInput.value.trim();
+      const password = passwordInput.value;
+
       loading.classList.add('show');
-      btnText.textContent = 'Đang xử lý...';
+      btnText.textContent = 'Đang kết nối...';
       form.querySelector('button').disabled = true;
 
       try {
+        // Update API_URL if config loaded late
+        if (window.APP_CONFIG && window.APP_CONFIG.API_URL) {
+          API_URL = window.APP_CONFIG.API_URL;
+        }
+
         const response = await fetch(`${API_URL}/auth/login`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ username, password }),
+          credentials: 'omit'
         });
 
-        const data = await response.json();
+        // Check if response is JSON
+        const contentType = response.headers.get('content-type');
+        let data;
+        
+        if (contentType && contentType.includes('application/json')) {
+          data = await response.json();
+        } else {
+          const text = await response.text();
+          console.error('Non-JSON response:', text);
+          throw new Error('Server trả về định dạng không hợp lệ');
+        }
 
         if (!response.ok) {
-          showError('❌ ' + (data.error || 'Đăng nhập thất bại'));
+          const errorMsg = data.error || data.message || 'Đăng nhập thất bại';
+          showError('❌ ' + errorMsg);
+          
+          // Highlight invalid fields
+          if (errorMsg.includes('username') || errorMsg.includes('tên đăng nhập')) {
+            usernameInput.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+            usernameInput.focus();
+          }
+          if (errorMsg.includes('password') || errorMsg.includes('mật khẩu')) {
+            passwordInput.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+            passwordInput.focus();
+          }
+          
           return;
         }
 
-        // Save token
+        // Check if response has required fields
+        if (!data.token || !data.user) {
+          showError('❌ Phản hồi từ server không hợp lệ');
+          return;
+        }
+
+        // Save token and user data
         localStorage.setItem('auth_token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
 
@@ -549,13 +653,18 @@
         }, 1200);
       } catch (error) {
         console.error('Login error:', error);
-        let errorMsg = 'Lỗi kết nối: ' + error.message;
+        let errorMsg = '';
         
-        if (error.message === 'Failed to fetch' || error.message.includes('fetch')) {
+        if (error.message === 'Failed to fetch' || error.message.includes('fetch') || error.name === 'TypeError') {
           const backendUrl = API_URL.replace('/api', '');
-          errorMsg = '❌ Không thể kết nối đến server. Vui lòng kiểm tra:\n' +
-                     `1. Backend server đã chạy chưa? (${backendUrl})\n` +
-                     '2. Kiểm tra console (F12) để xem chi tiết lỗi';
+          errorMsg = '❌ Không thể kết nối đến server. Vui lòng kiểm tra:<br>' +
+                     `1. Backend server đã chạy chưa? (${backendUrl})<br>` +
+                     '2. Kiểm tra console (F12) để xem chi tiết lỗi<br>' +
+                     '3. Kiểm tra kết nối internet';
+        } else if (error.message.includes('JSON')) {
+          errorMsg = '❌ Lỗi xử lý dữ liệu từ server. Vui lòng thử lại sau.';
+        } else {
+          errorMsg = '❌ Lỗi: ' + error.message;
         }
         
         showError(errorMsg);
@@ -566,13 +675,17 @@
       }
     });
 
-    // Focus effects
+    // Focus effects and validation on blur
     usernameInput.addEventListener('focus', function() {
       this.style.borderColor = 'rgba(255, 95, 175, 0.6)';
     });
 
     usernameInput.addEventListener('blur', function() {
-      this.style.borderColor = 'rgba(255, 182, 219, 0.2)';
+      if (this.value.trim().length > 0 && this.value.trim().length < 3) {
+        this.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+      } else {
+        this.style.borderColor = 'rgba(255, 182, 219, 0.2)';
+      }
     });
 
     passwordInput.addEventListener('focus', function() {
@@ -580,7 +693,42 @@
     });
 
     passwordInput.addEventListener('blur', function() {
-      this.style.borderColor = 'rgba(255, 182, 219, 0.2)';
+      if (this.value.length > 0 && this.value.length < 4) {
+        this.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+      } else {
+        this.style.borderColor = 'rgba(255, 182, 219, 0.2)';
+      }
+    });
+
+    // Real-time validation feedback
+    usernameInput.addEventListener('input', function() {
+      if (this.value.trim().length >= 3) {
+        this.style.borderColor = 'rgba(81, 207, 102, 0.5)';
+      } else if (this.value.trim().length > 0) {
+        this.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+      } else {
+        this.style.borderColor = 'rgba(255, 182, 219, 0.2)';
+      }
+    });
+
+    passwordInput.addEventListener('input', function() {
+      if (this.value.length >= 4) {
+        this.style.borderColor = 'rgba(81, 207, 102, 0.5)';
+      } else if (this.value.length > 0) {
+        this.style.borderColor = 'rgba(255, 107, 107, 0.6)';
+      } else {
+        this.style.borderColor = 'rgba(255, 182, 219, 0.2)';
+      }
+    });
+
+    // Log config on load
+    window.addEventListener('load', () => {
+      if (window.APP_CONFIG) {
+        console.log('🔧 Config loaded:', window.APP_CONFIG);
+        console.log('📍 API URL:', window.APP_CONFIG.API_URL);
+      } else {
+        console.warn('⚠️ Config not loaded');
+      }
     });
   </script>
 </body>
