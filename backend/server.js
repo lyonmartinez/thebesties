@@ -9,8 +9,22 @@ const leaderRoutes = require('./routes/leader');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Set default JWT values if not in .env
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'default_jwt_secret_change_in_production_123456789';
+  console.warn('⚠️  WARNING: Using default JWT_SECRET. Please set JWT_SECRET in .env file!');
+}
+if (!process.env.JWT_EXPIRE) {
+  process.env.JWT_EXPIRE = '7d';
+}
+
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: '*', // Cho phép tất cả origins (có thể thay đổi trong production)
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../')));
 

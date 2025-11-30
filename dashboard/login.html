@@ -480,7 +480,8 @@
     const btnText = document.getElementById('btnText');
 
     function showError(message) {
-      errorMessage.textContent = message;
+      // Cho phép xuống dòng trong thông báo lỗi
+      errorMessage.innerHTML = message.replace(/\n/g, '<br>');
       errorMessage.classList.add('show');
       successMessage.classList.remove('show');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -545,7 +546,16 @@
           }
         }, 1200);
       } catch (error) {
-        showError('❌ Lỗi kết nối: ' + error.message);
+        console.error('Login error:', error);
+        let errorMsg = 'Lỗi kết nối: ' + error.message;
+        
+        if (error.message === 'Failed to fetch' || error.message.includes('fetch')) {
+          errorMsg = '❌ Không thể kết nối đến server. Vui lòng kiểm tra:\n' +
+                     '1. Backend server đã chạy chưa? (http://localhost:5000)\n' +
+                     '2. Kiểm tra console (F12) để xem chi tiết lỗi';
+        }
+        
+        showError(errorMsg);
       } finally {
         loading.classList.remove('show');
         btnText.textContent = 'Đăng nhập';
