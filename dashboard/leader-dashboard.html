@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../style.css" />
+  <script src="../config.js"></script>
   <style>
     .dashboard-header {
       display: flex;
@@ -484,7 +485,8 @@
   </footer>
 
   <script>
-    const API_URL = 'http://localhost:5000/api';
+    // API URL from config (auto-detects GitHub Pages vs localhost)
+    const API_URL = window.APP_CONFIG?.API_URL || 'http://localhost:5000/api';
     const errorMessage = document.getElementById('errorMessage');
     const successMessage = document.getElementById('successMessage');
 
