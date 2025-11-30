@@ -267,7 +267,8 @@ Không cần thao tác thủ công! 🎉
 ## 📞 Thông tin Liên hệ
 
 - **GitHub:** https://github.com/lyonmartinez/thebesties
-- **Wiki:** http://localhost:5000 (local) hoặc deploy link
+- **Wiki (GitHub Pages):** https://lyonmartinez.github.io/thebesties
+- **Wiki (Local):** http://localhost:5000
 - **Leader:** Quản lý tất cả tài khoản
 
 ---
