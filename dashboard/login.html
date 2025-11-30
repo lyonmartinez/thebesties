@@ -552,8 +552,9 @@
         let errorMsg = 'Lỗi kết nối: ' + error.message;
         
         if (error.message === 'Failed to fetch' || error.message.includes('fetch')) {
+          const backendUrl = API_URL.replace('/api', '');
           errorMsg = '❌ Không thể kết nối đến server. Vui lòng kiểm tra:\n' +
-                     '1. Backend server đã chạy chưa? (http://localhost:5000)\n' +
+                     `1. Backend server đã chạy chưa? (${backendUrl})\n` +
                      '2. Kiểm tra console (F12) để xem chi tiết lỗi';
         }
         
