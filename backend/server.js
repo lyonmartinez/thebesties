@@ -43,9 +43,19 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// 404
-app.use((req, res) => {
+// 404 - Only for API routes
+app.use('/api/*', (req, res) => {
   res.status(404).json({ error: 'Not found' });
+});
+
+// Serve index.html for root and other non-API routes (SPA fallback)
+app.get('*', (req, res) => {
+  // Don't serve HTML for API routes
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'Not found' });
+  }
+  // For other routes, let express.static handle it
+  res.status(404).send('Page not found');
 });
 
 app.listen(PORT, () => {
