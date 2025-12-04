@@ -15,12 +15,6 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <script>
-      // Check password protection
-      if (sessionStorage.getItem('thebesties_access') !== 'granted') {
-        window.location.href = 'dashboard/login.html';
-      }
-    </script>
     <div class="bg-blur"></div>
     <header class="topbar">
       <div class="logo">
@@ -57,7 +51,7 @@
           </p>
           <div class="hero-actions">
             <a href="#overview" class="btn primary">Xem tiểu sử Gang</a>
-            <a href="dashboard/login.html" class="btn ghost">Đăng nhập</a>
+            <a href="dashboard/login.html" class="btn ghost">Đăng nhập với Discord</a>
           </div>
         </div>
         

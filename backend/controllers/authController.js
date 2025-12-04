@@ -225,6 +225,12 @@ const loadVerificationCodes = () => {
 // Save verification codes to file
 const saveVerificationCodes = (codes) => {
   try {
+    // Ensure data directory exists
+    const dataDir = path.dirname(verificationCodesPath);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+
     // Clean up expired codes before saving
     const now = Date.now();
     const cleanedCodes = {};
@@ -233,9 +239,10 @@ const saveVerificationCodes = (codes) => {
         cleanedCodes[code] = data;
       }
     }
-    fs.writeFileSync(verificationCodesPath, JSON.stringify(cleanedCodes, null, 2));
+    fs.writeFileSync(verificationCodesPath, JSON.stringify(cleanedCodes, null, 2), 'utf-8');
   } catch (error) {
     console.error('Error saving verification codes:', error);
+    throw error; // Re-throw to let caller handle it
   }
 };
 
@@ -263,6 +270,8 @@ const createVerificationCode = (req, res) => {
       discordId: null,
       userId: null
     };
+    
+    // Save codes - this will throw if there's an error
     saveVerificationCodes(codes);
 
     console.log(`✅ Verification code created: ${code} (expires in 5 minutes)`);
@@ -275,7 +284,10 @@ const createVerificationCode = (req, res) => {
     });
   } catch (error) {
     console.error('❌ Error creating verification code:', error);
-    res.status(500).json({ error: error.message || 'Lỗi khi tạo verification code' });
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: error.message || 'Lỗi khi tạo verification code. Vui lòng thử lại.' 
+    });
   }
 };
 

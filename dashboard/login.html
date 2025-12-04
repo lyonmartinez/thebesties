@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <script src="../config.js"></script>
+  <script src="../js/auth.js"></script>
   <style>
     :root {
       --pink: #ff5faf;
@@ -471,13 +472,26 @@
       <div class="message error-message" id="errorMessage"></div>
       <div class="message success-message" id="successMessage"></div>
 
-      <!-- Discord Bot Verification Login -->
+      <!-- Discord Login Section -->
       <div id="discordLoginSection">
-        <button type="button" id="discordLoginBtn" class="btn discord-btn">
+        <!-- Discord OAuth2 Login Button -->
+        <button type="button" id="discordOAuthBtn" class="btn discord-btn">
           <svg width="20" height="20" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
             <path d="M60.1045 4.8978C55.5792 2.8214 50.7265 1.2916 45.6527 0.41542C45.5603 0.39851 45.468 0.440769 45.4204 0.525289C44.7963 1.6353 44.105 3.0834 43.6209 4.2216C38.1637 3.4046 32.7345 3.4046 27.3892 4.2216C26.905 3.0581 26.1886 1.6353 25.5617 0.525289C25.5141 0.443589 25.4218 0.40133 25.3294 0.41542C20.2584 1.2888 15.4057 2.8186 10.8776 4.8978C10.8384 4.9147 10.8048 4.9429 10.7825 4.9795C1.57795 18.7309 -0.943561 32.1443 0.293408 45.3914C0.299005 45.4562 0.335386 45.5182 0.385761 45.5576C6.45866 50.0174 12.3413 52.7249 18.1147 54.5195C18.2071 54.5477 18.305 54.5139 18.3638 54.4378C19.7295 52.5728 20.9469 50.6063 21.9907 48.5383C22.0523 48.4172 21.9935 48.2735 21.8676 48.2256C19.9366 47.4931 18.0979 46.6 16.3292 45.5858C16.1893 45.5041 16.1781 45.304 16.3068 45.2082C16.679 44.9293 17.0513 44.6391 17.4067 44.3461C17.471 44.2926 17.5606 44.2813 17.6362 44.3151C29.2558 49.6202 41.6494 49.6202 53.1159 44.3151C53.1915 44.2785 53.2811 44.2898 53.3454 44.3433C53.7008 44.6363 54.0731 44.9293 54.4454 45.2082C54.5741 45.304 54.5629 45.5041 54.423 45.5858C52.6543 46.6197 50.8156 47.4931 48.8846 48.2228C48.7587 48.2707 48.6999 48.4172 48.7615 48.5383C49.8053 50.6034 51.0227 52.5699 52.3884 54.435C52.4472 54.5139 52.5451 54.5477 52.6375 54.5195C58.4118 52.7249 64.2945 50.0174 70.3674 45.5576C70.4178 45.5182 70.4542 45.459 70.4598 45.3942C71.9357 30.0791 68.7007 16.7757 60.1045 4.8978ZM23.7259 37.3253C20.2276 37.3253 17.3451 34.1136 17.3451 30.1693C17.3451 26.225 20.1717 23.0133 23.7259 23.0133C27.308 23.0133 30.1626 26.2532 30.1066 30.1693C30.1066 34.1136 27.28 37.3253 23.7259 37.3253ZM47.3178 37.3253C43.8196 37.3253 40.9371 34.1136 40.9371 30.1693C40.9371 26.225 43.7636 23.0133 47.3178 23.0133C50.9 23.0133 53.7545 26.2532 53.6986 30.1693C53.6986 34.1136 50.9 37.3253 47.3178 37.3253Z" fill="currentColor"/>
           </svg>
-          <span id="discordBtnText">Đăng nhập với Discord</span>
+          <span id="discordOAuthBtnText">Đăng nhập với Discord (OAuth2)</span>
+        </button>
+
+        <div class="divider">
+          <span>hoặc</span>
+        </div>
+
+        <!-- Discord Bot Verification Login -->
+        <button type="button" id="discordBotBtn" class="btn discord-btn" style="background: #5865F2; margin-top: 0;">
+          <svg width="20" height="20" viewBox="0 0 71 55" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right: 10px;">
+            <path d="M60.1045 4.8978C55.5792 2.8214 50.7265 1.2916 45.6527 0.41542C45.5603 0.39851 45.468 0.440769 45.4204 0.525289C44.7963 1.6353 44.105 3.0834 43.6209 4.2216C38.1637 3.4046 32.7345 3.4046 27.3892 4.2216C26.905 3.0581 26.1886 1.6353 25.5617 0.525289C25.5141 0.443589 25.4218 0.40133 25.3294 0.41542C20.2584 1.2888 15.4057 2.8186 10.8776 4.8978C10.8384 4.9147 10.8048 4.9429 10.7825 4.9795C1.57795 18.7309 -0.943561 32.1443 0.293408 45.3914C0.299005 45.4562 0.335386 45.5182 0.385761 45.5576C6.45866 50.0174 12.3413 52.7249 18.1147 54.5195C18.2071 54.5477 18.305 54.5139 18.3638 54.4378C19.7295 52.5728 20.9469 50.6063 21.9907 48.5383C22.0523 48.4172 21.9935 48.2735 21.8676 48.2256C19.9366 47.4931 18.0979 46.6 16.3292 45.5858C16.1893 45.5041 16.1781 45.304 16.3068 45.2082C16.679 44.9293 17.0513 44.6391 17.4067 44.3461C17.471 44.2926 17.5606 44.2813 17.6362 44.3151C29.2558 49.6202 41.6494 49.6202 53.1159 44.3151C53.1915 44.2785 53.2811 44.2898 53.3454 44.3433C53.7008 44.6363 54.0731 44.9293 54.4454 45.2082C54.5741 45.304 54.5629 45.5041 54.423 45.5858C52.6543 46.6197 50.8156 47.4931 48.8846 48.2228C48.7587 48.2707 48.6999 48.4172 48.7615 48.5383C49.8053 50.6034 51.0227 52.5699 52.3884 54.435C52.4472 54.5139 52.5451 54.5477 52.6375 54.5195C58.4118 52.7249 64.2945 50.0174 70.3674 45.5576C70.4178 45.5182 70.4542 45.459 70.4598 45.3942C71.9357 30.0791 68.7007 16.7757 60.1045 4.8978ZM23.7259 37.3253C20.2276 37.3253 17.3451 34.1136 17.3451 30.1693C17.3451 26.225 20.1717 23.0133 23.7259 23.0133C27.308 23.0133 30.1626 26.2532 30.1066 30.1693C30.1066 34.1136 27.28 37.3253 23.7259 37.3253ZM47.3178 37.3253C43.8196 37.3253 40.9371 34.1136 40.9371 30.1693C40.9371 26.225 43.7636 23.0133 47.3178 23.0133C50.9 23.0133 53.7545 26.2532 53.6986 30.1693C53.6986 34.1136 50.9 37.3253 47.3178 37.3253Z" fill="currentColor"/>
+          </svg>
+          <span id="discordBotBtnText">Đăng nhập với Bot Discord</span>
         </button>
         
         <!-- Verification Code Display -->
@@ -495,10 +509,6 @@
           <div id="verificationStatus" style="margin-top: 16px; text-align: center; font-size: 13px; color: var(--text-muted);">
             ⏳ Đang chờ xác thực...
           </div>
-        </div>
-        
-        <div class="divider">
-          <span>hoặc</span>
         </div>
       </div>
 
@@ -535,43 +545,108 @@
       </form>
 
       <div class="info-section">
-        <p>Quên mật khẩu? Liên hệ <strong>Leader</strong> để cấp lại.</p>
-        <p style="margin-top: 12px; font-size: 10px;">
+        <p style="margin-bottom: 8px;">
+          <strong>Hai cách đăng nhập:</strong><br>
+          <span style="font-size: 11px; color: var(--text-muted);">
+            • <strong>OAuth2:</strong> Đăng nhập trực tiếp qua Discord (nhanh nhất)<br>
+            • <strong>Bot Verification:</strong> Lấy code và gửi cho bot Discord
+          </span>
+        </p>
+        <p style="margin-top: 12px; font-size: 10px; color: var(--text-muted);">
           © 2025 The Besties Gang • FiveM<br>
-          Màu hồng nhưng không yếu đuối.
+          <span style="color: var(--pink-soft);">Màu hồng nhưng không yếu đuối.</span>
         </p>
       </div>
     </div>
   </div>
 
   <script>
-    // Wait for config to load
-    let API_URL = 'http://localhost:5000/api';
-    let DISCORD_CLIENT_ID = '';
-    let DISCORD_REDIRECT_URI = '';
-    
-    // Check if config is loaded
-    if (window.APP_CONFIG && window.APP_CONFIG.API_URL) {
-      API_URL = window.APP_CONFIG.API_URL;
-      DISCORD_CLIENT_ID = window.APP_CONFIG.DISCORD_CLIENT_ID || '';
-      DISCORD_REDIRECT_URI = window.APP_CONFIG.DISCORD_REDIRECT_URI || '';
-    } else {
-      // Wait a bit for config.js to load
-      setTimeout(() => {
-        if (window.APP_CONFIG && window.APP_CONFIG.API_URL) {
-          API_URL = window.APP_CONFIG.API_URL;
-          DISCORD_CLIENT_ID = window.APP_CONFIG.DISCORD_CLIENT_ID || '';
-          DISCORD_REDIRECT_URI = window.APP_CONFIG.DISCORD_REDIRECT_URI || '';
-          console.log('✅ Config loaded:', API_URL);
-        } else {
-          console.warn('⚠️ Config not loaded, using default:', API_URL);
+    // Check if this is an OAuth callback
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get('code');
+    const state = urlParams.get('state');
+    const error = urlParams.get('error');
+
+    // Handle OAuth callback
+    if (code && state) {
+      // This is a Discord OAuth callback
+      (async () => {
+        try {
+          if (window.Auth) {
+            await window.Auth.handleDiscordCallback(code, state);
+          } else {
+            // Wait for auth.js to load
+            setTimeout(async () => {
+              if (window.Auth) {
+                await window.Auth.handleDiscordCallback(code, state);
+              } else {
+                showError('❌ Lỗi: Không thể tải authentication module');
+              }
+            }, 500);
+          }
+        } catch (error) {
+          console.error('OAuth callback error:', error);
+          showError('❌ ' + (error.message || 'Lỗi khi xử lý đăng nhập Discord'));
         }
-      }, 100);
+      })();
+    } else if (error) {
+      // OAuth error
+      showError('❌ Discord đã từ chối yêu cầu đăng nhập: ' + error);
+      // Clean URL
+      window.history.replaceState({}, document.title, window.location.pathname);
     }
 
-    // Discord Bot Verification Login
-    const discordLoginBtn = document.getElementById('discordLoginBtn');
-    const discordBtnText = document.getElementById('discordBtnText');
+    // Wait for Auth module to load
+    let authReady = false;
+    const checkAuthReady = setInterval(() => {
+      if (window.Auth) {
+        authReady = true;
+        clearInterval(checkAuthReady);
+        initLoginPage();
+      }
+    }, 100);
+
+    // Initialize login page
+    function initLoginPage() {
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+
+      function showError(message) {
+        errorMessage.innerHTML = message.replace(/\n/g, '<br>');
+        errorMessage.classList.add('show');
+        successMessage.classList.remove('show');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function showSuccess(message) {
+        successMessage.textContent = message;
+        successMessage.classList.add('show');
+        errorMessage.classList.remove('show');
+      }
+
+      // Discord OAuth2 Login Button
+      const discordOAuthBtn = document.getElementById('discordOAuthBtn');
+      const discordOAuthBtnText = document.getElementById('discordOAuthBtnText');
+
+      discordOAuthBtn.addEventListener('click', async () => {
+        try {
+          discordOAuthBtnText.textContent = 'Đang chuyển hướng...';
+          discordOAuthBtn.disabled = true;
+          errorMessage.classList.remove('show');
+          successMessage.classList.remove('show');
+
+          await window.Auth.discordOAuth2Login();
+        } catch (error) {
+          console.error('Discord OAuth2 login error:', error);
+          showError('❌ ' + (error.message || 'Lỗi khi đăng nhập với Discord'));
+          discordOAuthBtnText.textContent = 'Đăng nhập với Discord (OAuth2)';
+          discordOAuthBtn.disabled = false;
+        }
+      });
+
+      // Discord Bot Verification Login
+      const discordBotBtn = document.getElementById('discordBotBtn');
+      const discordBotBtnText = document.getElementById('discordBotBtnText');
     const verificationSection = document.getElementById('verificationSection');
     const verificationCode = document.getElementById('verificationCode');
     const verificationStatus = document.getElementById('verificationStatus');
@@ -609,119 +684,82 @@
       }, 1000);
     }
 
-    // Check verification status
-    async function checkVerificationStatus() {
-      if (!verificationCodeValue) return;
+      // Check verification status
+      async function checkVerificationStatus() {
+        if (!verificationCodeValue) return;
 
-      try {
-        const response = await fetch(`${API_URL}/auth/discord/check-verification?code=${verificationCodeValue}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
+        try {
+          const result = await window.Auth.checkVerification(verificationCodeValue);
 
-        const data = await response.json();
+          if (result.verified) {
+            // Verification successful!
+            clearInterval(verificationInterval);
+            clearInterval(countdownInterval);
+            
+            verificationStatus.textContent = '✅ Xác thực thành công! Đang chuyển hướng...';
+            verificationStatus.style.color = '#6ee7a0';
+            showSuccess('✅ Đăng nhập thành công! Chuyển hướng...');
 
-        if (data.success && data.verified) {
-          // Verification successful!
-          clearInterval(verificationInterval);
-          clearInterval(countdownInterval);
-          
-          // Save token and user data
-          localStorage.setItem('auth_token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-
-          verificationStatus.textContent = '✅ Xác thực thành công! Đang chuyển hướng...';
-          verificationStatus.style.color = '#6ee7a0';
-          showSuccess('✅ Đăng nhập thành công! Chuyển hướng...');
-
-          // Redirect based on role
-          setTimeout(() => {
-            if (data.user.role === 'leader') {
-              window.location.href = './leader-dashboard.html';
-            } else {
-              window.location.href = './member-dashboard.html';
-            }
-          }, 1200);
-        } else if (data.error) {
-          // Error occurred
-          clearInterval(verificationInterval);
-          clearInterval(countdownInterval);
-          verificationStatus.textContent = '❌ ' + data.error;
-          verificationStatus.style.color = '#ff8a8a';
-          showError('❌ ' + data.error);
+            // Redirect based on role
+            setTimeout(() => {
+              window.Auth.redirectToDashboard(result.user);
+            }, 1200);
+          } else if (result.error) {
+            // Error occurred
+            clearInterval(verificationInterval);
+            clearInterval(countdownInterval);
+            verificationStatus.textContent = '❌ ' + result.error;
+            verificationStatus.style.color = '#ff8a8a';
+            showError('❌ ' + result.error);
+          }
+          // Otherwise, still waiting...
+        } catch (error) {
+          console.error('Error checking verification:', error);
+          // Don't show error, just keep polling
         }
-        // Otherwise, still waiting...
-      } catch (error) {
-        console.error('Error checking verification:', error);
-        // Don't show error, just keep polling
       }
-    }
 
-    // Create verification code
-    discordLoginBtn.addEventListener('click', async () => {
-      try {
-        discordBtnText.textContent = 'Đang tạo code...';
-        discordLoginBtn.disabled = true;
-        errorMessage.classList.remove('show');
-        successMessage.classList.remove('show');
+      // Create verification code
+      discordBotBtn.addEventListener('click', async () => {
+        try {
+          discordBotBtnText.textContent = 'Đang tạo code...';
+          discordBotBtn.disabled = true;
+          errorMessage.classList.remove('show');
+          successMessage.classList.remove('show');
 
-        const response = await fetch(`${API_URL}/auth/discord/verify-code`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
+          const result = await window.Auth.createVerificationCode();
 
-        const data = await response.json();
+          // Show verification section
+          verificationCodeValue = result.code;
+          verificationCode.textContent = result.code;
+          verificationSection.style.display = 'block';
+          verificationStatus.textContent = '⏳ Đang chờ xác thực...';
+          verificationStatus.style.color = 'var(--text-muted)';
 
-        if (!response.ok || !data.success) {
-          throw new Error(data.error || 'Không thể tạo verification code');
+          // Start countdown
+          startCountdown();
+
+          // Start polling for verification
+          if (verificationInterval) clearInterval(verificationInterval);
+          verificationInterval = setInterval(checkVerificationStatus, 2000); // Check every 2 seconds
+
+          // Scroll to verification section
+          verificationSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        } catch (error) {
+          console.error('Discord bot login error:', error);
+          showError('❌ ' + (error.message || 'Lỗi khi tạo verification code. Vui lòng thử lại.'));
+          discordBotBtnText.textContent = 'Đăng nhập với Bot Discord';
+          discordBotBtn.disabled = false;
         }
+      });
 
-        // Show verification section
-        verificationCodeValue = data.code;
-        verificationCode.textContent = data.code;
-        verificationSection.style.display = 'block';
-        verificationStatus.textContent = '⏳ Đang chờ xác thực...';
-        verificationStatus.style.color = 'var(--text-muted)';
-
-        // Start countdown
-        startCountdown();
-
-        // Start polling for verification
-        if (verificationInterval) clearInterval(verificationInterval);
-        verificationInterval = setInterval(checkVerificationStatus, 2000); // Check every 2 seconds
-
-        // Scroll to verification section
-        verificationSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-      } catch (error) {
-        console.error('Discord login error:', error);
-        showError('❌ Lỗi khi tạo verification code. Vui lòng thử lại.');
-        discordBtnText.textContent = 'Đăng nhập với Discord';
-        discordLoginBtn.disabled = false;
-      }
-    });
-
-    const form = document.getElementById('loginForm');
-    const usernameInput = document.getElementById('username');
-    const passwordInput = document.getElementById('password');
-    const errorMessage = document.getElementById('errorMessage');
-    const successMessage = document.getElementById('successMessage');
-    const loading = document.getElementById('loading');
-    const btnText = document.getElementById('btnText');
-
-    function showError(message) {
-      // Cho phép xuống dòng trong thông báo lỗi
-      errorMessage.innerHTML = message.replace(/\n/g, '<br>');
-      errorMessage.classList.add('show');
-      successMessage.classList.remove('show');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function showSuccess(message) {
-      successMessage.textContent = message;
-      successMessage.classList.add('show');
-      errorMessage.classList.remove('show');
-    }
+      // Legacy form (hidden by default)
+      const form = document.getElementById('loginForm');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const loading = document.getElementById('loading');
+      const btnText = document.getElementById('btnText');
 
     // Validate username and password
     function validateInputs() {
@@ -800,12 +838,8 @@
       form.querySelector('button').disabled = true;
 
       try {
-        // Update API_URL if config loaded late
-        if (window.APP_CONFIG && window.APP_CONFIG.API_URL) {
-          API_URL = window.APP_CONFIG.API_URL;
-        }
-
-        const response = await fetch(`${API_URL}/auth/login`, {
+        const apiUrl = window.Auth.getAPIUrl();
+        const response = await fetch(`${apiUrl}/auth/login`, {
           method: 'POST',
           headers: { 
             'Content-Type': 'application/json',
@@ -851,25 +885,21 @@
         }
 
         // Save token and user data
-        localStorage.setItem('auth_token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        window.Auth.saveAuth(data.token, data.user);
 
         showSuccess('✅ Đăng nhập thành công! Chuyển hướng...');
 
         // Redirect based on role
         setTimeout(() => {
-          if (data.user.role === 'leader') {
-            window.location.href = './leader-dashboard.html';
-          } else {
-            window.location.href = './member-dashboard.html';
-          }
+          window.Auth.redirectToDashboard(data.user);
         }, 1200);
       } catch (error) {
         console.error('Login error:', error);
         let errorMsg = '';
         
         if (error.message === 'Failed to fetch' || error.message.includes('fetch') || error.name === 'TypeError') {
-          const backendUrl = API_URL.replace('/api', '');
+          const apiUrl = window.Auth.getAPIUrl();
+          const backendUrl = apiUrl.replace('/api', '');
           errorMsg = '❌ Không thể kết nối đến server. Vui lòng kiểm tra:<br>' +
                      `1. Backend server đã chạy chưa? (${backendUrl})<br>` +
                      '2. Kiểm tra console (F12) để xem chi tiết lỗi<br>' +
@@ -934,15 +964,25 @@
       }
     });
 
-    // Log config on load
-    window.addEventListener('load', () => {
-      if (window.APP_CONFIG) {
-        console.log('🔧 Config loaded:', window.APP_CONFIG);
-        console.log('📍 API URL:', window.APP_CONFIG.API_URL);
-      } else {
-        console.warn('⚠️ Config not loaded');
-      }
-    });
+    }
+
+    // Global error/success functions for OAuth callback
+    function showError(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+      errorMessage.innerHTML = message.replace(/\n/g, '<br>');
+      errorMessage.classList.add('show');
+      successMessage.classList.remove('show');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showSuccess(message) {
+      const errorMessage = document.getElementById('errorMessage');
+      const successMessage = document.getElementById('successMessage');
+      successMessage.textContent = message;
+      successMessage.classList.add('show');
+      errorMessage.classList.remove('show');
+    }
   </script>
 </body>
 </html>
