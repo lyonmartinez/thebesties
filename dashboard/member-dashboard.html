@@ -425,7 +425,7 @@
     }
 
     // Avatar upload handler
-    document.getElementById('avatarInput').addEventListener('change', (e) => {
+    document.getElementById('avatarInput').addEventListener('change', async (e) => {
       const file = e.target.files[0];
       if (!file) return;
 
@@ -434,18 +434,45 @@
         return;
       }
 
+      const token = checkAuth();
+      if (!token) return;
+
+      // Show preview immediately
       const reader = new FileReader();
       reader.onload = (event) => {
         const avatarPreview = document.getElementById('avatarPreview');
         avatarPreview.innerHTML = `<img src="${event.target.result}" alt="Avatar" />`;
-        localStorage.setItem('user_avatar', event.target.result);
-        showSuccess('Avatar cập nhật (nhấn Lưu thay đổi để lưu vĩnh viễn)');
       };
       reader.readAsDataURL(file);
+
+      // Upload to server
+      try {
+        const formData = new FormData();
+        formData.append('avatar', file);
+
+        const response = await fetch(`${API_URL}/auth/upload/avatar`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Upload avatar thất bại');
+          return;
+        }
+
+        showSuccess('Avatar đã được lưu vào thư mục images!');
+      } catch (error) {
+        showError('Lỗi upload avatar: ' + error.message);
+      }
     });
 
     // Gallery image upload handler
-    document.getElementById('imageInput').addEventListener('change', (e) => {
+    document.getElementById('imageInput').addEventListener('change', async (e) => {
       const files = Array.from(e.target.files);
       
       if (uploadedImages.length + files.length > 5) {
@@ -453,6 +480,10 @@
         return;
       }
 
+      const token = checkAuth();
+      if (!token) return;
+
+      // Show preview immediately
       files.forEach(file => {
         if (!file.type.match('image/png')) {
           showError('Chỉ chấp nhận định dạng PNG');
@@ -463,10 +494,36 @@
         reader.onload = (event) => {
           uploadedImages.push(event.target.result);
           renderGallery();
-          showSuccess(`Thêm ảnh thành công (${uploadedImages.length}/5)`);
         };
         reader.readAsDataURL(file);
       });
+
+      // Upload to server
+      try {
+        const formData = new FormData();
+        files.forEach(file => {
+          formData.append('images', file);
+        });
+
+        const response = await fetch(`${API_URL}/auth/upload/gallery`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Upload ảnh thất bại');
+          return;
+        }
+
+        showSuccess(`${files.length} ảnh đã được lưu vào thư mục images!`);
+      } catch (error) {
+        showError('Lỗi upload ảnh: ' + error.message);
+      }
 
       e.target.value = '';
     });
@@ -550,11 +607,6 @@
         if (!response.ok) {
           showError(data.error || 'Cập nhật thất bại');
           return;
-        }
-
-        // Save images to localStorage
-        if (uploadedImages.length > 0) {
-          localStorage.setItem('user_images', JSON.stringify(uploadedImages));
         }
 
         showSuccess('Hồ sơ cập nhật thành công!');
