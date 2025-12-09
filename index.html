@@ -384,64 +384,97 @@
     </script>
 
     <script>
-      // Load members from API
-      (function() {
-        // Auto-detect API URL
-        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-        const API_URL = window.APP_CONFIG?.API_URL || (isLocalhost ? 'http://localhost:5000/api' : 'https://thebesties-backend.onrender.com/api');
-        const membersGrid = document.getElementById('membersGrid');
-        
-        // Generate avatar letter from name
-        function getAvatarLetter(name) {
-          return name ? name.charAt(0).toUpperCase() : '?';
-        }
-
-        // Load and display members
-        async function loadMembers() {
-          try {
-            const response = await fetch(`${API_URL}/leader/public/members`);
-            if (!response.ok) {
-              throw new Error('Failed to load members');
-            }
-            
-            const data = await response.json();
-            const members = data.members || [];
-            
-            if (members.length === 0) {
-              membersGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Chưa có thành viên nào</p>';
-              return;
-            }
-            
-            // Generate member cards
-            membersGrid.innerHTML = members.map((member, index) => {
-              const avatarUrl = member.discordAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=ff5faf&color=fff&size=120`;
-              const avatarLetter = getAvatarLetter(member.name);
-              const memberLink = member.folder ? `members/${member.folder}/index.html` : '#';
-              
-              return `
-                <a class="member-card" href="${memberLink}">
-                  <div class="member-avatar" style="background-image: url('${avatarUrl}'); background-size: cover; background-position: center;">
-                    ${!member.discordAvatar ? avatarLetter : ''}
-                  </div>
-                  <h3 class="member-name">${member.name || 'Thành viên'}</h3>
-                  <p class="member-role">${member.character || 'Thành viên Gang'}</p>
-                  <p class="member-desc">
-                    Thành viên của The Besties Gang
-                  </p>
-                </a>
-              `;
-            }).join('');
-          } catch (error) {
-            console.error('Error loading members:', error);
-            membersGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Không thể tải danh sách thành viên. Vui lòng thử lại sau.</p>';
+      // Load members from API (wait for DOM and config to be ready)
+      document.addEventListener('DOMContentLoaded', function() {
+        // Wait a bit for config.js to load if needed
+        setTimeout(function() {
+          // Auto-detect API URL
+          const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+          const API_URL = window.APP_CONFIG?.API_URL || (isLocalhost ? 'http://localhost:5000/api' : 'https://thebesties-backend.onrender.com/api');
+          const membersGrid = document.getElementById('membersGrid');
+          
+          if (!membersGrid) {
+            console.error('Members grid not found');
+            return;
           }
-        }
-        
-        // Load members when page loads
-        if (membersGrid) {
+          
+          // Generate avatar letter from name
+          function getAvatarLetter(name) {
+            return name ? name.charAt(0).toUpperCase() : '?';
+          }
+
+          // Load and display members
+          async function loadMembers() {
+            try {
+              console.log('Loading members from:', API_URL);
+              
+              // Create timeout manually for better browser compatibility
+              const controller = new AbortController();
+              const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+              
+              const response = await fetch(`${API_URL}/leader/public/members`, {
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                signal: controller.signal
+              });
+              
+              clearTimeout(timeoutId);
+              
+              if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+              }
+              
+              const data = await response.json();
+              const members = data.members || [];
+              
+              console.log('Loaded members:', members.length);
+              
+              if (members.length === 0) {
+                membersGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Chưa có thành viên nào</p>';
+                return;
+              }
+              
+              // Generate member cards
+              membersGrid.innerHTML = members.map((member, index) => {
+                const avatarUrl = member.discordAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=ff5faf&color=fff&size=120`;
+                const avatarLetter = getAvatarLetter(member.name);
+                const memberLink = member.folder ? `members/${member.folder}/index.html` : '#';
+                
+                return `
+                  <a class="member-card" href="${memberLink}">
+                    <div class="member-avatar" style="background-image: url('${avatarUrl}'); background-size: cover; background-position: center; ${!member.discordAvatar ? 'display: flex; align-items: center; justify-content: center;' : ''}">
+                      ${!member.discordAvatar ? `<span style="font-size: 48px; font-weight: bold; color: white;">${avatarLetter}</span>` : ''}
+                    </div>
+                    <h3 class="member-name">${member.name || 'Thành viên'}</h3>
+                    <p class="member-role">${member.character || 'Thành viên Gang'}</p>
+                    <p class="member-desc">
+                      Thành viên của The Besties Gang
+                    </p>
+                  </a>
+                `;
+              }).join('');
+            } catch (error) {
+              console.error('Error loading members:', error);
+              let errorMsg = 'Không thể tải danh sách thành viên.';
+              
+              if (error.name === 'AbortError' || error.message.includes('timeout')) {
+                errorMsg += ' Backend không phản hồi. Vui lòng kiểm tra backend server.';
+              } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.name === 'TypeError') {
+                errorMsg += ' Không thể kết nối đến backend. Đảm bảo backend đang chạy tại: ' + API_URL;
+              } else {
+                errorMsg += ' ' + (error.message || 'Lỗi không xác định');
+              }
+              
+              membersGrid.innerHTML = `<p style="text-align: center; color: #ff6b6b; grid-column: 1 / -1; padding: 20px;">${errorMsg}<br><small style="color: var(--text-muted);">API URL: ${API_URL}</small></p>`;
+            }
+          }
+          
+          // Load members
           loadMembers();
-        }
-      })();
+        }, 100); // Small delay to ensure config.js is loaded
+      });
     </script>
 
     <footer class="footer">
