@@ -431,6 +431,34 @@
             return name ? name.charAt(0).toUpperCase() : '?';
           }
 
+          // Display members helper function
+          function displayMembers(members) {
+            if (members.length === 0) {
+              membersGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Chưa có thành viên nào</p>';
+              return;
+            }
+            
+            // Generate member cards
+            membersGrid.innerHTML = members.map((member, index) => {
+              const avatarUrl = member.discordAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=ff5faf&color=fff&size=120`;
+              const avatarLetter = getAvatarLetter(member.name);
+              const memberLink = member.folder ? `members/${member.folder}/index.html` : '#';
+              
+              return `
+                <a class="member-card" href="${memberLink}">
+                  <div class="member-avatar" style="background-image: url('${avatarUrl}'); background-size: cover; background-position: center; ${!member.discordAvatar ? 'display: flex; align-items: center; justify-content: center;' : ''}">
+                    ${!member.discordAvatar ? `<span style="font-size: 48px; font-weight: bold; color: white;">${avatarLetter}</span>` : ''}
+                  </div>
+                  <h3 class="member-name">${member.name || 'Thành viên'}</h3>
+                  <p class="member-role">${member.character || 'Thành viên Gang'}</p>
+                  <p class="member-desc">
+                    Thành viên của The Besties Gang
+                  </p>
+                </a>
+              `;
+            }).join('');
+          }
+
           // Load and display members
           async function loadMembers() {
             try {
@@ -438,9 +466,9 @@
               
               // Create timeout manually for better browser compatibility
               const controller = new AbortController();
-              const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+              const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
               
-              // Add cache busting to ensure fresh data
+              // Try to load from API first
               const response = await fetch(`${API_URL}/leader/public/members?t=${Date.now()}`, {
                 method: 'GET',
                 headers: {
@@ -460,45 +488,51 @@
               const data = await response.json();
               const members = data.members || [];
               
-              console.log('Loaded members:', members.length);
+              console.log('Loaded members from API:', members.length);
+              displayMembers(members);
               
-              if (members.length === 0) {
-                membersGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Chưa có thành viên nào</p>';
-                return;
+            } catch (error) {
+              console.warn('API failed, trying fallback:', error);
+              
+              // Fallback: Try to load from static JSON file
+              try {
+                const fallbackResponse = await fetch('data/members.json?t=' + Date.now(), {
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  cache: 'no-store'
+                });
+                
+                if (fallbackResponse.ok) {
+                  const fallbackData = await fallbackResponse.json();
+                  const members = fallbackData.members || [];
+                  console.log('Loaded members from fallback:', members.length);
+                  displayMembers(members);
+                  
+                  // Show subtle notice that using cached data
+                  const notice = document.createElement('p');
+                  notice.style.cssText = 'text-align: center; color: var(--text-muted); font-size: 12px; grid-column: 1 / -1; margin-top: 10px;';
+                  notice.textContent = '⚠️ Đang hiển thị dữ liệu tạm thời. Backend đang offline.';
+                  membersGrid.appendChild(notice);
+                  return;
+                }
+              } catch (fallbackError) {
+                console.error('Fallback also failed:', fallbackError);
               }
               
-              // Generate member cards
-              membersGrid.innerHTML = members.map((member, index) => {
-                const avatarUrl = member.discordAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=ff5faf&color=fff&size=120`;
-                const avatarLetter = getAvatarLetter(member.name);
-                const memberLink = member.folder ? `members/${member.folder}/index.html` : '#';
-                
-                return `
-                  <a class="member-card" href="${memberLink}">
-                    <div class="member-avatar" style="background-image: url('${avatarUrl}'); background-size: cover; background-position: center; ${!member.discordAvatar ? 'display: flex; align-items: center; justify-content: center;' : ''}">
-                      ${!member.discordAvatar ? `<span style="font-size: 48px; font-weight: bold; color: white;">${avatarLetter}</span>` : ''}
-                    </div>
-                    <h3 class="member-name">${member.name || 'Thành viên'}</h3>
-                    <p class="member-role">${member.character || 'Thành viên Gang'}</p>
-                    <p class="member-desc">
-                      Thành viên của The Besties Gang
-                    </p>
-                  </a>
-                `;
-              }).join('');
-            } catch (error) {
-              console.error('Error loading members:', error);
+              // If both fail, show error
               let errorMsg = 'Không thể tải danh sách thành viên.';
               
               if (error.name === 'AbortError' || error.message.includes('timeout')) {
-                errorMsg += ' Backend không phản hồi. Vui lòng kiểm tra backend server.';
+                errorMsg += ' Backend không phản hồi.';
               } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.name === 'TypeError') {
-                errorMsg += ' Không thể kết nối đến backend. Đảm bảo backend đang chạy tại: ' + API_URL;
+                errorMsg += ' Backend đang offline hoặc không thể kết nối.';
               } else {
                 errorMsg += ' ' + (error.message || 'Lỗi không xác định');
               }
               
-              membersGrid.innerHTML = `<p style="text-align: center; color: #ff6b6b; grid-column: 1 / -1; padding: 20px;">${errorMsg}<br><small style="color: var(--text-muted);">API URL: ${API_URL}</small></p>`;
+              membersGrid.innerHTML = `<p style="text-align: center; color: #ff6b6b; grid-column: 1 / -1; padding: 20px;">${errorMsg}<br><small style="color: var(--text-muted);">Vui lòng thử lại sau hoặc liên hệ Leader.</small></p>`;
             }
           }
           
