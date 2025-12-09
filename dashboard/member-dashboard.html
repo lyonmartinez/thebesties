@@ -364,19 +364,37 @@
     </div>
 
     <div class="form-section">
-      <h2>Nhân vật / Vai trò</h2>
-      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Mô tả vai trò và nhân vật của bạn trong Gang</p>
+      <h2>Nhân vật</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Mô tả nhân vật game/FiveM của bạn</p>
       
       <form id="characterForm">
         <div class="form-row full">
           <div class="form-group">
-            <label for="character">Nhân vật / Vai trò</label>
-            <input type="text" id="character" name="character" placeholder="Ví dụ: Xạ thủ / Hậu cần" />
+            <label for="character">Nhân vật</label>
+            <input type="text" id="character" name="character" placeholder="Ví dụ: Marcus Graham, John Doe" />
           </div>
         </div>
 
         <div class="button-group">
-          <button type="submit" class="btn primary" id="saveCharacterBtn">Lưu vai trò</button>
+          <button type="submit" class="btn primary" id="saveCharacterBtn">Lưu nhân vật</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-section">
+      <h2>Vai trò</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Mô tả vai trò và chuyên môn của bạn trong Gang</p>
+      
+      <form id="roleForm">
+        <div class="form-row full">
+          <div class="form-group">
+            <label for="role">Vai trò</label>
+            <input type="text" id="role" name="role" placeholder="Ví dụ: Xạ thủ / Hậu cần / Tài xế" />
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn primary" id="saveRoleBtn">Lưu vai trò</button>
         </div>
       </form>
     </div>
@@ -670,11 +688,48 @@
           return;
         }
 
-        showSuccess('Vai trò đã được cập nhật!');
+        showSuccess('Nhân vật đã được cập nhật!');
       } catch (error) {
         showError('Lỗi: ' + error.message);
       } finally {
         saveCharacterBtn.disabled = false;
+      }
+    });
+
+    // Save role form
+    const roleForm = document.getElementById('roleForm');
+    roleForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = checkAuth();
+      if (!token) return;
+
+      const saveRoleBtn = document.getElementById('saveRoleBtn');
+      saveRoleBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_URL}/auth/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            role: document.getElementById('role').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Cập nhật thất bại');
+          return;
+        }
+
+        showSuccess('Vai trò đã được cập nhật!');
+      } catch (error) {
+        showError('Lỗi: ' + error.message);
+      } finally {
+        saveRoleBtn.disabled = false;
       }
     });
 

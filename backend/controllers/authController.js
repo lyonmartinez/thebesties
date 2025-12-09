@@ -169,7 +169,9 @@ const getCurrentUser = (req, res) => {
       name: user.name,
       role: user.role,
       email: user.email,
-      character: user.character,
+      character: user.character || null,
+      role: user.role || null,
+      bio: user.bio || null,
       folder: user.folder
     });
   } catch (error) {
@@ -179,7 +181,7 @@ const getCurrentUser = (req, res) => {
 
 const updateMemberProfile = async (req, res) => {
   try {
-    const { name, character, bio, avatar } = req.body;
+    const { name, character, role, bio, avatar } = req.body;
     const users = loadUsers();
     const userIndex = users.users.findIndex(u => u.id === req.user.id);
 
@@ -187,9 +189,10 @@ const updateMemberProfile = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (name) users.users[userIndex].name = name;
-    if (character) users.users[userIndex].character = character;
-    if (bio) users.users[userIndex].bio = bio;
+    if (name !== undefined) users.users[userIndex].name = name;
+    if (character !== undefined) users.users[userIndex].character = character;
+    if (role !== undefined) users.users[userIndex].role = role;
+    if (bio !== undefined) users.users[userIndex].bio = bio;
     if (avatar) users.users[userIndex].avatar = avatar;
 
     saveUsers(users);
