@@ -67,12 +67,21 @@ const discordLogin = async (req, res) => {
     let user = users.users.find(u => u.discordId === discordId);
 
     if (!user) {
-      // Get leader name for error message
+      // Get leader info for error message
       const leader = users.users.find(u => u.role === 'leader' && u.isActive);
-      const leaderName = leader ? leader.name : 'Leader';
+      let leaderMention = 'Leader';
+      if (leader) {
+        if (leader.discordId) {
+          // Use Discord mention format <@USER_ID>
+          leaderMention = `<@${leader.discordId}>`;
+        } else {
+          // Fallback to name if no Discord ID
+          leaderMention = `@${leader.name}`;
+        }
+      }
       
       return res.status(401).json({ 
-        error: `Discord ID của bạn không có trong hệ thống của THE BESTIES. Có bất cứ gì hãy liên hệ với @${leaderName}` 
+        error: `Discord ID của bạn không có trong hệ thống của THE BESTIES. Có bất cứ gì hãy liên hệ với ${leaderMention}` 
       });
     }
 
