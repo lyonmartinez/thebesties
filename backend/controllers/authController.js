@@ -354,11 +354,20 @@ const verifyCode = (code, discordId) => {
     if (!user) {
       console.log(`❌ Discord ID ${discordId} not found in users`);
       console.log(`📋 Available Discord IDs: ${users.users.map(u => u.discordId || 'N/A').join(', ')}`);
-      // Get leader name for error message
+      // Get leader info for error message
       const leader = users.users.find(u => u.role === 'leader' && u.isActive);
-      const leaderName = leader ? leader.name : 'Leader';
+      let leaderMention = 'Leader';
+      if (leader) {
+        if (leader.discordId) {
+          // Use Discord mention format <@USER_ID>
+          leaderMention = `<@${leader.discordId}>`;
+        } else {
+          // Fallback to name if no Discord ID
+          leaderMention = `@${leader.name}`;
+        }
+      }
       
-      return { success: false, error: `Discord ID ${discordId} không được đăng ký trong hệ thống. Vui lòng liên hệ @${leaderName} để được thêm vào.` };
+      return { success: false, error: `Discord ID ${discordId} không được đăng ký trong hệ thống. Vui lòng liên hệ ${leaderMention} để được thêm vào.`, leaderMention };
     }
 
     // Mark as verified

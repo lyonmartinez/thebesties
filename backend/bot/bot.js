@@ -123,10 +123,16 @@ client.on('messageCreate', async message => {
 
         await message.reply({ embeds: [embed] });
       } else {
+        // Get leader mention if available
+        let errorMessage = result.error || 'Code không hợp lệ';
+        if (result.leaderMention) {
+          errorMessage = errorMessage.replace(result.leaderMention, result.leaderMention);
+        }
+        
         const embed = new EmbedBuilder()
           .setColor(0xFF5FAF)
           .setTitle('❌ Xác thực thất bại')
-          .setDescription(result.error || 'Code không hợp lệ')
+          .setDescription(errorMessage)
           .setFooter({ text: 'The Besties Gang • FiveM' })
           .setTimestamp();
 
