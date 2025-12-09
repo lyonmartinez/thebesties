@@ -390,43 +390,13 @@
         <h2>Thêm thành viên mới</h2>
 
         <form id="createMemberForm">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="newUsername">Tên đăng nhập</label>
-              <input type="text" id="newUsername" name="username" placeholder="username" required />
-            </div>
-            <div class="form-group">
-              <label for="newName">Tên</label>
-              <input type="text" id="newName" name="name" placeholder="Tên thành viên" required />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="newEmail">Email</label>
-              <input type="email" id="newEmail" name="email" placeholder="email@example.com" required />
-            </div>
-            <div class="form-group">
-              <label for="newPassword">Mật khẩu</label>
-              <input type="password" id="newPassword" name="password" placeholder="••••••••" required />
-            </div>
-          </div>
-
           <div class="form-row full">
             <div class="form-group">
-              <label for="newCharacter">Vai trò / Nhân vật (FiveM)</label>
-              <input type="text" id="newCharacter" name="character" placeholder="Ví dụ: Xạ thủ / Hậu cần" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
               <label for="newDiscordId">Discord ID</label>
-              <input type="text" id="newDiscordId" name="discordId" placeholder="Ví dụ: 884246119285162055" />
-            </div>
-            <div class="form-group">
-              <label for="newDiscordUsername">Discord Username</label>
-              <input type="text" id="newDiscordUsername" name="discordUsername" placeholder="Ví dụ: 1_patrick." />
+              <input type="text" id="newDiscordId" name="discordId" placeholder="Ví dụ: 884246119285162055" required />
+              <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px; display: block;">
+                💡 Hệ thống sẽ tự động lấy thông tin từ Discord (tên, username, avatar) và tạo tài khoản
+              </small>
             </div>
           </div>
 
@@ -473,12 +443,6 @@
           </div>
         </div>
 
-        <div class="form-row full">
-          <div class="form-group">
-            <label for="editEmail">Email</label>
-            <input type="email" id="editEmail" required />
-          </div>
-        </div>
 
         <div class="button-group">
           <button type="submit" class="btn primary">Lưu thay đổi</button>
@@ -593,11 +557,10 @@
       }).join('');
     }
 
-    function openEditModal(id, name, character, email) {
+    function openEditModal(id, name, character) {
       document.getElementById('editMemberId').value = id;
       document.getElementById('editName').value = name;
-      document.getElementById('editCharacter').value = character;
-      document.getElementById('editEmail').value = email;
+      document.getElementById('editCharacter').value = character || '';
       document.getElementById('editModal').classList.add('show');
     }
 
@@ -622,13 +585,7 @@
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            username: document.getElementById('newUsername').value,
-            email: document.getElementById('newEmail').value,
-            password: document.getElementById('newPassword').value,
-            name: document.getElementById('newName').value,
-            character: document.getElementById('newCharacter').value,
-            discordId: document.getElementById('newDiscordId').value,
-            discordUsername: document.getElementById('newDiscordUsername').value
+            discordId: document.getElementById('newDiscordId').value
           })
         });
 
@@ -668,8 +625,7 @@
           },
           body: JSON.stringify({
             name: document.getElementById('editName').value,
-            character: document.getElementById('editCharacter').value,
-            email: document.getElementById('editEmail').value
+            character: document.getElementById('editCharacter').value
           })
         });
 

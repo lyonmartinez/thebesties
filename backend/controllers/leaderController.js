@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
+const axios = require('axios');
 const { createMemberFolder, pushToGithub } = require('../utils/github');
 
 const usersPath = path.join(__dirname, '../data/users.json');
@@ -40,38 +41,64 @@ const getAllMembers = (req, res) => {
 
 const createMember = async (req, res) => {
   try {
-    const { username, email, password, name, character, discordId, discordUsername } = req.body;
+    const { discordId } = req.body;
 
-    if (!username || !email || !password || !name) {
-      return res.status(400).json({ error: 'All fields required' });
+    if (!discordId) {
+      return res.status(400).json({ error: 'Discord ID is required' });
     }
 
     const users = loadUsers();
 
-    // Check if user already exists
-    if (users.users.find(u => u.username === username || u.email === email)) {
-      return res.status(400).json({ error: 'User already exists' });
+    // Check if Discord ID already exists
+    if (users.users.find(u => u.discordId === discordId)) {
+      return res.status(400).json({ error: 'Discord ID already registered' });
     }
 
-    // Hash password
+    // Fetch Discord user info from Discord API
+    let discordUser;
+    try {
+      const discordResponse = await axios.get(`https://discord.com/api/v10/users/${discordId}`, {
+        headers: {
+          'Authorization': `Bot ${process.env.DISCORD_BOT_TOKEN}`
+        }
+      });
+      discordUser = discordResponse.data;
+    } catch (error) {
+      console.error('Error fetching Discord user:', error.response?.data || error.message);
+      return res.status(400).json({ 
+        error: 'Không thể lấy thông tin từ Discord. Kiểm tra Discord ID và đảm bảo bot có quyền truy cập.' 
+      });
+    }
+
+    // Auto-generate fields from Discord data
+    const discordUsername = discordUser.username || `user_${discordId.substring(0, 6)}`;
+    const username = discordUsername.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    const email = `${username}@thebesties.gang`;
+    const name = discordUser.global_name || discordUsername || `Member ${discordId.substring(0, 6)}`;
+    const password = Math.random().toString(36).slice(-12) + Math.random().toString(36).slice(-12); // Random password
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Generate memberId
     const memberId = `member-${Date.now()}`;
     const folder = username.toLowerCase();
 
-    // Create member object
+    // Build Discord avatar URL
+    const discordAvatar = discordUser.avatar 
+      ? `https://cdn.discordapp.com/avatars/${discordId}/${discordUser.avatar}.${discordUser.avatar.startsWith('a_') ? 'gif' : 'png'}`
+      : null;
+
+    // Create member object (only Discord fields + auto-generated ones)
     const newMember = {
       id: memberId,
-      username,
-      email,
-      password: hashedPassword,
+      discordId,
+      discordUsername,
+      discordAvatar,
+      username, // Auto-generated
+      email, // Auto-generated
+      password: hashedPassword, // Auto-generated
       role: 'member',
-      name,
-      character: character || 'Thành viên Gang',
-      discordId: discordId || null,
-      discordUsername: discordUsername || null,
-      discordAvatar: null,
+      name, // From Discord
+      character: 'Thành viên Gang', // Default
       folder,
       createdAt: new Date().toISOString(),
       isActive: true
@@ -99,8 +126,11 @@ const createMember = async (req, res) => {
       message: 'Member created successfully',
       member: {
         id: newMember.id,
-        username: newMember.username,
+        discordId: newMember.discordId,
+        discordUsername: newMember.discordUsername,
+        discordAvatar: newMember.discordAvatar,
         name: newMember.name,
+        username: newMember.username,
         email: newMember.email,
         folder: newMember.folder
       }
@@ -113,7 +143,7 @@ const createMember = async (req, res) => {
 const updateMember = async (req, res) => {
   try {
     const { memberId } = req.params;
-    const { name, character, email } = req.body;
+    const { name, character } = req.body;
 
     const users = loadUsers();
     const memberIndex = users.users.findIndex(u => u.id === memberId);
@@ -123,8 +153,7 @@ const updateMember = async (req, res) => {
     }
 
     if (name) users.users[memberIndex].name = name;
-    if (character) users.users[memberIndex].character = character;
-    if (email) users.users[memberIndex].email = email;
+    if (character !== undefined) users.users[memberIndex].character = character || 'Thành viên Gang';
 
     saveUsers(users);
 
