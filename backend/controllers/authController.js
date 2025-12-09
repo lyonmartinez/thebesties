@@ -232,8 +232,8 @@ const loadVerificationCodes = () => {
   return {};
 };
 
-// Save verification codes to file
-const saveVerificationCodes = (codes) => {
+// Save verification codes to file (optimized - only clean expired codes periodically, not on every save)
+const saveVerificationCodes = (codes, skipCleanup = false) => {
   try {
     // Ensure data directory exists
     const dataDir = path.dirname(verificationCodesPath);
@@ -241,25 +241,35 @@ const saveVerificationCodes = (codes) => {
       fs.mkdirSync(dataDir, { recursive: true });
     }
 
-    // Clean up expired codes before saving
-    const now = Date.now();
-    const cleanedCodes = {};
-    for (const [code, data] of Object.entries(codes)) {
-      if (data.expiresAt > now) {
-        cleanedCodes[code] = data;
+    let codesToSave = codes;
+    
+    // Only clean up expired codes if explicitly requested (for periodic cleanup)
+    if (!skipCleanup) {
+      const now = Date.now();
+      codesToSave = {};
+      for (const [code, data] of Object.entries(codes)) {
+        if (data.expiresAt > now) {
+          codesToSave[code] = data;
+        }
       }
     }
-    fs.writeFileSync(verificationCodesPath, JSON.stringify(cleanedCodes, null, 2), 'utf-8');
+    
+    // Use writeFileSync for immediate write (fast for small files)
+    fs.writeFileSync(verificationCodesPath, JSON.stringify(codesToSave, null, 2), 'utf-8');
   } catch (error) {
     console.error('Error saving verification codes:', error);
     throw error; // Re-throw to let caller handle it
   }
 };
 
-// Clean up expired codes periodically
+// Clean up expired codes periodically (background task, doesn't block requests)
 setInterval(() => {
-  const codes = loadVerificationCodes();
-  saveVerificationCodes(codes); // This will clean up expired codes
+  try {
+    const codes = loadVerificationCodes();
+    saveVerificationCodes(codes, false); // Clean up expired codes
+  } catch (error) {
+    console.error('Error in periodic cleanup:', error);
+  }
 }, 60000); // Every minute
 
 // Generate random verification code
@@ -267,13 +277,17 @@ const generateVerificationCode = () => {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
 };
 
-// Create verification code for Discord bot login
+// Create verification code for Discord bot login (optimized for speed)
 const createVerificationCode = (req, res) => {
   try {
+    // Generate code immediately
     const code = generateVerificationCode();
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
 
+    // Load codes (fast - small file)
     const codes = loadVerificationCodes();
+    
+    // Add new code
     codes[code] = {
       expiresAt,
       verified: false,
@@ -281,11 +295,12 @@ const createVerificationCode = (req, res) => {
       userId: null
     };
     
-    // Save codes - this will throw if there's an error
-    saveVerificationCodes(codes);
+    // Save codes immediately without cleanup (skip cleanup for speed)
+    saveVerificationCodes(codes, true);
 
     console.log(`✅ Verification code created: ${code} (expires in 5 minutes)`);
 
+    // Return immediately
     res.json({
       success: true,
       code,
