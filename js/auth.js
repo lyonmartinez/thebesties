@@ -14,13 +14,38 @@
   const getDiscordConfig = async () => {
     try {
       const response = await fetch(`${getAPIUrl()}/auth/discord-config`);
+      
+      // Check if backend is not running
+      if (!response.ok && response.status === 0) {
+        throw new Error('BACKEND_NOT_RUNNING');
+      }
+      
       const data = await response.json();
+      
+      // Check if Discord Client ID is not configured
+      if (!data.clientId) {
+        throw new Error('DISCORD_CLIENT_ID_NOT_CONFIGURED');
+      }
+      
       return {
         clientId: data.clientId || '',
         redirectUri: data.redirectUri || window.APP_CONFIG?.DISCORD_REDIRECT_URI || ''
       };
     } catch (error) {
       console.error('Error fetching Discord config:', error);
+      
+      // Check if it's a network error (backend not running)
+      if (error.message === 'BACKEND_NOT_RUNNING' || 
+          error.message.includes('Failed to fetch') || 
+          error.name === 'TypeError') {
+        throw new Error('BACKEND_NOT_RUNNING');
+      }
+      
+      // Discord Client ID not configured
+      if (error.message === 'DISCORD_CLIENT_ID_NOT_CONFIGURED') {
+        throw new Error('DISCORD_CLIENT_ID_NOT_CONFIGURED');
+      }
+      
       return {
         clientId: '',
         redirectUri: window.APP_CONFIG?.DISCORD_REDIRECT_URI || ''
@@ -84,8 +109,9 @@
   const discordOAuth2Login = async () => {
     try {
       const config = await getDiscordConfig();
+      
       if (!config.clientId) {
-        throw new Error('Discord Client ID chưa được cấu hình');
+        throw new Error('DISCORD_CLIENT_ID_NOT_CONFIGURED');
       }
 
       const redirectUri = encodeURIComponent(config.redirectUri);
