@@ -355,7 +355,6 @@ const verifyCode = (code, discordId) => {
       console.log(`❌ Discord ID ${discordId} not found in users`);
       console.log(`📋 Available Discord IDs: ${users.users.map(u => u.discordId || 'N/A').join(', ')}`);
       // Get leader name for error message
-      const users = loadUsers();
       const leader = users.users.find(u => u.role === 'leader' && u.isActive);
       const leaderName = leader ? leader.name : 'Leader';
       
