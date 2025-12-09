@@ -605,6 +605,7 @@
       }
     }
 
+    // Save name form
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const token = checkAuth();
@@ -621,8 +622,80 @@
             'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({
-            name: document.getElementById('name').value,
-            character: document.getElementById('character').value,
+            name: document.getElementById('name').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Cập nhật thất bại');
+          return;
+        }
+
+        showSuccess('Tên đã được cập nhật!');
+      } catch (error) {
+        showError('Lỗi: ' + error.message);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    // Save character form
+    const characterForm = document.getElementById('characterForm');
+    characterForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = checkAuth();
+      if (!token) return;
+
+      const saveCharacterBtn = document.getElementById('saveCharacterBtn');
+      saveCharacterBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_URL}/auth/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            character: document.getElementById('character').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          showError(data.error || 'Cập nhật thất bại');
+          return;
+        }
+
+        showSuccess('Vai trò đã được cập nhật!');
+      } catch (error) {
+        showError('Lỗi: ' + error.message);
+      } finally {
+        saveCharacterBtn.disabled = false;
+      }
+    });
+
+    // Save bio form
+    const bioForm = document.getElementById('bioForm');
+    bioForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = checkAuth();
+      if (!token) return;
+
+      const saveBioBtn = document.getElementById('saveBioBtn');
+      saveBioBtn.disabled = true;
+
+      try {
+        const response = await fetch(`${API_URL}/auth/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
             bio: document.getElementById('bio').value
           })
         });
@@ -634,11 +707,11 @@
           return;
         }
 
-        showSuccess('Hồ sơ cập nhật thành công!');
+        showSuccess('Tiểu sử đã được cập nhật!');
       } catch (error) {
         showError('Lỗi: ' + error.message);
       } finally {
-        saveBtn.disabled = false;
+        saveBioBtn.disabled = false;
       }
     });
 
