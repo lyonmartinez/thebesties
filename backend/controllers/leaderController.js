@@ -181,19 +181,22 @@ const deleteMember = async (req, res) => {
       return res.status(404).json({ error: 'Member not found' });
     }
 
-    const memberFolder = users.users[memberIndex].folder;
-    users.users[memberIndex].isActive = false;
+    const member = users.users[memberIndex];
+    const memberFolder = member.folder;
 
+    // Remove member from users list completely
+    users.users.splice(memberIndex, 1);
     saveUsers(users);
 
-    // Delete folder from filesystem
-    const folderPath = path.join(process.env.REPO_PATH, 'members', memberFolder);
+    // Delete folder from filesystem (static member page)
+    const repoPath = process.env.REPO_PATH || path.join(__dirname, '..', '..');
+    const folderPath = path.join(repoPath, 'members', memberFolder);
     if (fs.existsSync(folderPath)) {
       fs.rmSync(folderPath, { recursive: true, force: true });
     }
 
-    // Push to GitHub
-    await pushToGithub(`Remove member: ${users.users[memberIndex].name}`);
+    // Push to GitHub so GitHub Pages cập nhật
+    await pushToGithub(`Remove member: ${member.name}`);
 
     res.json({ success: true, message: 'Member deleted successfully' });
   } catch (error) {

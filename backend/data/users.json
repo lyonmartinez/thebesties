@@ -9,7 +9,10 @@
       "name": "Leader Name",
       "character": "Leader Character",
       "createdAt": "2025-01-01T00:00:00Z",
-      "isActive": true
+      "isActive": true,
+      "discordId": "884246119285162055",
+      "discordUsername": "1_patrick.",
+      "discordAvatar": "https://cdn.discordapp.com/avatars/884246119285162055/35a6074da97b2defa789b04152962eb9.webp"
     },
     {
       "id": "member-001",
@@ -21,7 +24,10 @@
       "character": "Shooter / Support",
       "folder": "member1",
       "createdAt": "2025-01-01T00:00:00Z",
-      "isActive": true
+      "isActive": true,
+      "discordId": "884246119285162055",
+      "discordUsername": "1_patrick.",
+      "discordAvatar": "https://cdn.discordapp.com/avatars/884246119285162055/35a6074da97b2defa789b04152962eb9.webp"
     },
     {
       "id": "member-002",
@@ -33,9 +39,7 @@
       "character": "Driver / Escape",
       "folder": "member2",
       "createdAt": "2025-01-01T00:00:00Z",
-      "isActive": true,
-      "discordId": "884246119285162055",
-      "discordUsername": "1_patrick."
+      "isActive": true
     },
     {
       "id": "member-003",
@@ -47,7 +51,7 @@
       "character": "Negotiator / Diplomat",
       "folder": "member3",
       "createdAt": "2025-01-01T00:00:00Z",
-      "isActive": true
+      "isActive": false
     },
     {
       "id": "member-004",
@@ -59,7 +63,7 @@
       "character": "Support / Backup",
       "folder": "member4",
       "createdAt": "2025-01-01T00:00:00Z",
-      "isActive": true
+      "isActive": false
     }
   ]
 }
