@@ -13,6 +13,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="style.css" />
+    <script src="config.js"></script>
   </head>
   <body>
     <div class="bg-blur"></div>
@@ -179,39 +180,8 @@
           <h2>Thành viên</h2>
           <p>Những mảnh ghép tạo nên The Besties – mỗi người một màu, nhưng cùng chung 1 Gang.</p>
         </div>
-        <div class="member-grid">
-          <a class="member-card" href="members/member1/index.html">
-            <div class="member-avatar">A</div>
-            <h3 class="member-name">Member 1</h3>
-            <p class="member-role">Xạ thủ / Hậu cần</p>
-            <p class="member-desc">
-              Luôn có mặt đúng lúc với đầy đủ đồ nghề và aim cực gắt.
-            </p>
-          </a>
-          <a class="member-card" href="members/member2/index.html">
-            <div class="member-avatar">B</div>
-            <h3 class="member-name">Member 2</h3>
-            <p class="member-role">Tài xế / Tẩu thoát</p>
-            <p class="member-desc">
-              Drift một cái là trốn khỏi tầm mắt police trong vài giây.
-            </p>
-          </a>
-          <a class="member-card" href="members/member3/index.html">
-            <div class="member-avatar">C</div>
-            <h3 class="member-name">Member 3</h3>
-            <p class="member-role">Đàm phán / Ngoại giao</p>
-            <p class="member-desc">
-              Miệng nói chuyện nhẹ nhàng nhưng deal nào cũng có lợi cho team.
-            </p>
-          </a>
-          <a class="member-card" href="members/member4/index.html">
-            <div class="member-avatar">D</div>
-            <h3 class="member-name">Member 4</h3>
-            <p class="member-role">Hậu phương / Hỗ trợ</p>
-            <p class="member-desc">
-              Luôn backup, cover team từ xa và không bao giờ bỏ anh em.
-            </p>
-          </a>
+        <div class="member-grid" id="membersGrid">
+          <p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Đang tải danh sách thành viên...</p>
         </div>
       </section>
 
@@ -410,6 +380,65 @@
         closeBtn.addEventListener('click', closeLightbox);
         lightbox.addEventListener('click', function(e){ if(e.target === lightbox) closeLightbox(); });
         document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeLightbox(); });
+      })();
+    </script>
+
+    <script>
+      // Load members from API
+      (function() {
+        const API_URL = window.APP_CONFIG?.API_URL || 'http://localhost:5000/api' || 'https://thebesties-backend.onrender.com/api';
+        const membersGrid = document.getElementById('membersGrid');
+        
+        // Generate avatar letter from name
+        function getAvatarLetter(name) {
+          return name ? name.charAt(0).toUpperCase() : '?';
+        }
+
+        // Load and display members
+        async function loadMembers() {
+          try {
+            const response = await fetch(`${API_URL}/leader/public/members`);
+            if (!response.ok) {
+              throw new Error('Failed to load members');
+            }
+            
+            const data = await response.json();
+            const members = data.members || [];
+            
+            if (members.length === 0) {
+              membersGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Chưa có thành viên nào</p>';
+              return;
+            }
+            
+            // Generate member cards
+            membersGrid.innerHTML = members.map((member, index) => {
+              const avatarUrl = member.discordAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=ff5faf&color=fff&size=120`;
+              const avatarLetter = getAvatarLetter(member.name);
+              const memberLink = member.folder ? `members/${member.folder}/index.html` : '#';
+              
+              return `
+                <a class="member-card" href="${memberLink}">
+                  <div class="member-avatar" style="background-image: url('${avatarUrl}'); background-size: cover; background-position: center;">
+                    ${!member.discordAvatar ? avatarLetter : ''}
+                  </div>
+                  <h3 class="member-name">${member.name || 'Thành viên'}</h3>
+                  <p class="member-role">${member.character || 'Thành viên Gang'}</p>
+                  <p class="member-desc">
+                    Thành viên của The Besties Gang
+                  </p>
+                </a>
+              `;
+            }).join('');
+          } catch (error) {
+            console.error('Error loading members:', error);
+            membersGrid.innerHTML = '<p style="text-align: center; color: var(--text-muted); grid-column: 1 / -1;">Không thể tải danh sách thành viên. Vui lòng thử lại sau.</p>';
+          }
+        }
+        
+        // Load members when page loads
+        if (membersGrid) {
+          loadMembers();
+        }
       })();
     </script>
 

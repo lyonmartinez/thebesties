@@ -79,6 +79,8 @@ app.listen(PORT, () => {
   console.log(`   GET /api/auth/discord/check-verification - Check verification status`);
   console.log(`   GET /api/auth/me - Get current user`);
   console.log(`   PUT /api/auth/profile - Update profile`);
+  console.log(`   GET /api/leader/public/members - Get all members (Public)`);
+  console.log(`   GET /api/leader/public/leader - Get leader info (Public)`);
   console.log(`   GET /api/leader/members - Get all members (Leader only)`);
   console.log(`   POST /api/leader/members - Create member (Leader only)`);
   console.log(`   PUT /api/leader/members/:id - Update member (Leader only)`);

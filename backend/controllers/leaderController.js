@@ -39,6 +39,50 @@ const getAllMembers = (req, res) => {
   }
 };
 
+// Public API: Get all active members (no auth required)
+const getPublicMembers = (req, res) => {
+  try {
+    const users = loadUsers();
+    const members = users.users
+      .filter(u => u.role === 'member' && u.isActive)
+      .map(u => ({
+        id: u.id,
+        name: u.name,
+        character: u.character || 'Thành viên Gang',
+        folder: u.folder,
+        discordAvatar: u.discordAvatar || null
+      }));
+
+    res.json({ success: true, members });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Public API: Get leader info (no auth required)
+const getPublicLeader = (req, res) => {
+  try {
+    const users = loadUsers();
+    const leader = users.users.find(u => u.role === 'leader' && u.isActive);
+    
+    if (!leader) {
+      return res.status(404).json({ error: 'Leader not found' });
+    }
+
+    res.json({
+      success: true,
+      leader: {
+        id: leader.id,
+        name: leader.name,
+        character: leader.character || 'Gang Leader',
+        discordAvatar: leader.discordAvatar || null
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const createMember = async (req, res) => {
   try {
     const { discordId } = req.body;
@@ -208,5 +252,7 @@ module.exports = {
   getAllMembers,
   createMember,
   updateMember,
-  deleteMember
+  deleteMember,
+  getPublicMembers,
+  getPublicLeader
 };
