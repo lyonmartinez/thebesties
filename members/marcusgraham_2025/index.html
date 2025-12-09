@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../../style.css" />
+  <script src="../../config.js"></script>
 </head>
 <body>
   <!-- Member profile pages are public, no login required -->
@@ -39,25 +40,25 @@
   <main>
     <section class="hero-compact section">
       <div class="section-header">
-        <h2>Ethan • Hồ sơ thành viên</h2>
-        <p>Trang hồ sơ chi tiết về thành viên Ethan.</p>
+        <h2 id="memberName">Đang tải...</h2>
+        <p id="memberSubtitle">Trang hồ sơ chi tiết về thành viên.</p>
       </div>
 
       <div class="member-profile-layout" style="margin-top:18px;">
         <aside class="member-profile-meta">
-          <div class="avatar-large">
-            <img src="images/avatar.jpg" alt="Ethan" style="width:96px;height:96px;border-radius:999px;display:block;object-fit:cover;" onerror="this.style.display='none';" />
+          <div class="avatar-large" id="memberAvatar" style="width:96px;height:96px;border-radius:999px;background:linear-gradient(135deg, #ff5faf, #ff2b8a);display:flex;align-items:center;justify-content:center;color:white;font-size:48px;font-weight:bold;">
+            ?
           </div>
-          <h3 class="member-profile-role">Ethan</h3>
+          <h3 class="member-profile-role" id="memberNameSidebar">Đang tải...</h3>
 
           <div class="member-profile-info">
             <div>
               <dt>Vai trò</dt>
-              <dd>Thành viên Gang</dd>
+              <dd id="memberRole">Thành viên Gang</dd>
             </div>
             <div>
               <dt>Gia nhập</dt>
-              <dd>2025</dd>
+              <dd id="memberJoined">2025</dd>
             </div>
             <div>
               <dt>Trạng thái</dt>
@@ -68,34 +69,24 @@
 
         <div class="member-profile-content">
           <h3>Giới thiệu</h3>
-          <p>
-            Đây là trang hồ sơ của Ethan. Nội dung này có thể được chỉnh sửa bởi chính thành viên hoặc Leader.
+          <p id="memberBio">
+            Đang tải thông tin...
           </p>
 
-          <section style="margin-top:18px;">
+          <section style="margin-top:18px;" id="memberDetailsSection">
             <h4>Thông tin Chi tiết</h4>
-            <p>
-              <strong>Nhân vật:</strong> [Nhân vật game/FiveM của bạn]
+            <p id="memberCharacter">
+              <strong>Nhân vật:</strong> <span id="characterValue">Đang tải...</span>
             </p>
-            <p>
-              <strong>Chuyên môn:</strong> [Kỹ năng chính của bạn]
-            </p>
-            <p>
-              <strong>Tiểu sử:</strong> [Câu chuyện của bạn trong Gang]
+            <p id="memberBioDetail" style="display:none;">
+              <strong>Tiểu sử:</strong> <span id="bioValue"></span>
             </p>
           </section>
 
-          <section style="margin-top:24px;">
+          <section style="margin-top:24px;" id="gallerySection">
             <h4>Hình ảnh & Khoảnh khắc</h4>
-            <div class="member-gallery">
-              <figure class="member-photo">
-                <img src="images/photo1.jpg" alt="Highlight 1" onerror="this.parentElement.style.display='none';" />
-                <figcaption>Khoảnh khắc</figcaption>
-              </figure>
-              <figure class="member-photo">
-                <img src="images/photo2.jpg" alt="Highlight 2" onerror="this.parentElement.style.display='none';" />
-                <figcaption>Khoảnh khắc</figcaption>
-              </figure>
+            <div class="member-gallery" id="memberGallery">
+              <!-- Gallery images loaded dynamically -->
             </div>
           </section>
 
@@ -114,5 +105,123 @@
       <span class="footer-sub">Màu hồng nhưng không yếu đuối.</span>
     </p>
   </footer>
+
+  <script>
+    // Load member profile data
+    (function() {
+      const API_URL = window.APP_CONFIG?.API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5000/api' : 'https://thebesties-backend.onrender.com/api');
+      const folderName = 'marcusgraham_2025'; // Get from current path
+      
+      async function loadMemberProfile() {
+        try {
+          // Try to load from API
+          const response = await fetch(`${API_URL}/leader/public/members?t=${Date.now()}`);
+          if (response.ok) {
+            const data = await response.json();
+            const member = data.members?.find(m => m.folder === folderName);
+            if (member) {
+              displayMember(member);
+              return;
+            }
+          }
+        } catch (error) {
+          console.warn('API failed, trying fallback:', error);
+        }
+        
+        // Fallback: Try static JSON
+        try {
+          const fallbackResponse = await fetch('../../data/members.json?t=' + Date.now());
+          if (fallbackResponse.ok) {
+            const fallbackData = await fallbackResponse.json();
+            const member = fallbackData.members?.find(m => m.folder === folderName);
+            if (member) {
+              displayMember(member);
+              return;
+            }
+          }
+        } catch (error) {
+          console.error('Fallback failed:', error);
+        }
+        
+        // Default fallback data
+        displayMember({
+          name: 'Ethan',
+          character: 'Thành viên Gang',
+          bio: 'Thành viên của The Besties Gang',
+          folder: folderName
+        });
+      }
+      
+      function displayMember(member) {
+        const name = member.name || 'Thành viên';
+        const firstLetter = name.charAt(0).toUpperCase();
+        
+        // Update title
+        document.getElementById('memberName').textContent = `${name} • Hồ sơ thành viên`;
+        document.getElementById('memberSubtitle').textContent = `Trang hồ sơ chi tiết về thành viên ${name}.`;
+        document.getElementById('memberNameSidebar').textContent = name;
+        
+        // Update avatar
+        const avatarEl = document.getElementById('memberAvatar');
+        const avatarUrl = member.discordAvatar || `images/avatar.png`;
+        avatarEl.innerHTML = '';
+        avatarEl.style.backgroundImage = `url('${avatarUrl}')`;
+        avatarEl.style.backgroundSize = 'cover';
+        avatarEl.style.backgroundPosition = 'center';
+        avatarEl.addEventListener('error', function() {
+          this.style.backgroundImage = '';
+          this.style.background = 'linear-gradient(135deg, #ff5faf, #ff2b8a)';
+          this.textContent = firstLetter;
+        });
+        
+        // Update role
+        document.getElementById('memberRole').textContent = member.character || 'Thành viên Gang';
+        document.getElementById('characterValue').textContent = member.character || 'Chưa cập nhật';
+        
+        // Update joined year
+        if (member.createdAt) {
+          const year = new Date(member.createdAt).getFullYear();
+          document.getElementById('memberJoined').textContent = year;
+        }
+        
+        // Update bio
+        if (member.bio) {
+          document.getElementById('memberBio').textContent = member.bio;
+          document.getElementById('bioValue').textContent = member.bio;
+          document.getElementById('memberBioDetail').style.display = 'block';
+        } else {
+          document.getElementById('memberBio').textContent = 'Thành viên của The Besties Gang.';
+        }
+        
+        // Load gallery images
+        loadGalleryImages();
+      }
+      
+      function loadGalleryImages() {
+        const gallery = document.getElementById('memberGallery');
+        const images = [];
+        
+        // Try to load photo1.png, photo2.png, etc.
+        for (let i = 1; i <= 5; i++) {
+          const img = document.createElement('figure');
+          img.className = 'member-photo';
+          const imgEl = document.createElement('img');
+          imgEl.src = `images/photo${i}.png`;
+          imgEl.alt = `Khoảnh khắc ${i}`;
+          imgEl.addEventListener('error', function() {
+            img.style.display = 'none';
+          });
+          const caption = document.createElement('figcaption');
+          caption.textContent = 'Khoảnh khắc';
+          img.appendChild(imgEl);
+          img.appendChild(caption);
+          gallery.appendChild(img);
+        }
+      }
+      
+      // Load profile when page loads
+      loadMemberProfile();
+    })();
+  </script>
 </body>
 </html>
