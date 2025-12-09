@@ -26,7 +26,10 @@ const getAllMembers = (req, res) => {
         character: u.character,
         email: u.email,
         folder: u.folder,
-        createdAt: u.createdAt
+        createdAt: u.createdAt,
+        discordId: u.discordId || null,
+        discordUsername: u.discordUsername || null,
+        discordAvatar: u.discordAvatar || null
       }));
 
     res.json({ success: true, members });
@@ -37,7 +40,7 @@ const getAllMembers = (req, res) => {
 
 const createMember = async (req, res) => {
   try {
-    const { username, email, password, name, character } = req.body;
+    const { username, email, password, name, character, discordId, discordUsername } = req.body;
 
     if (!username || !email || !password || !name) {
       return res.status(400).json({ error: 'All fields required' });
@@ -66,6 +69,9 @@ const createMember = async (req, res) => {
       role: 'member',
       name,
       character: character || 'Thành viên Gang',
+      discordId: discordId || null,
+      discordUsername: discordUsername || null,
+      discordAvatar: null,
       folder,
       createdAt: new Date().toISOString(),
       isActive: true

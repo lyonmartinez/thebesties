@@ -419,6 +419,17 @@
             </div>
           </div>
 
+          <div class="form-row">
+            <div class="form-group">
+              <label for="newDiscordId">Discord ID</label>
+              <input type="text" id="newDiscordId" name="discordId" placeholder="Ví dụ: 884246119285162055" />
+            </div>
+            <div class="form-group">
+              <label for="newDiscordUsername">Discord Username</label>
+              <input type="text" id="newDiscordUsername" name="discordUsername" placeholder="Ví dụ: 1_patrick." />
+            </div>
+          </div>
+
           <div class="button-group">
             <button type="submit" class="btn primary">Tạo thành viên</button>
           </div>
@@ -553,11 +564,22 @@
         return;
       }
 
-      list.innerHTML = members.map(member => `
+      list.innerHTML = members.map(member => {
+        const avatar = member.discordAvatar || '';
+        const initials = member.name?.[0]?.toUpperCase() || '?';
+        return `
         <div class="member-item">
           <div class="member-info">
-            <h4>${member.name}</h4>
-            <p>@${member.username} • ${member.character}</p>
+            <div class="avatar" style="margin-right: 12px;">
+              ${avatar 
+                ? `<img src="${avatar}" alt="${member.name}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">`
+                : `<div style="width:36px;height:36px;border-radius:50%;background:#5865f2;color:white;display:flex;align-items:center;justify-content:center;font-weight:700;">${initials}</div>`
+              }
+            </div>
+            <div>
+              <h4>${member.name}</h4>
+              <p>@${member.username} • ${member.character || ''}${member.discordUsername ? ` • Discord: ${member.discordUsername}` : ''}</p>
+            </div>
           </div>
           <div style="color: var(--text-muted); font-size: 12px;">
             ${new Date(member.createdAt).toLocaleDateString('vi-VN')}
@@ -567,7 +589,8 @@
             <button class="icon-btn" style="color: #ff6b6b;" onclick="deleteMember('${member.id}', '${member.name}')">🗑️ Xóa</button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function openEditModal(id, name, character, email) {
@@ -603,7 +626,9 @@
             email: document.getElementById('newEmail').value,
             password: document.getElementById('newPassword').value,
             name: document.getElementById('newName').value,
-            character: document.getElementById('newCharacter').value
+            character: document.getElementById('newCharacter').value,
+            discordId: document.getElementById('newDiscordId').value,
+            discordUsername: document.getElementById('newDiscordUsername').value
           })
         });
 
