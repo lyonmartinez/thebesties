@@ -122,7 +122,14 @@ client.on('messageCreate', async message => {
       }
     } catch (error) {
       console.error('Lỗi xử lý verification code:', error);
-      await message.reply('❌ Đã xảy ra lỗi khi xử lý code. Vui lòng thử lại sau.');
+      console.error('Error stack:', error.stack);
+      const embed = new EmbedBuilder()
+        .setColor(0xFF5FAF)
+        .setTitle('❌ Xác thực thất bại')
+        .setDescription(`Lỗi khi xác thực code: ${error.message || 'Lỗi không xác định'}\n\nVui lòng kiểm tra:\n• Discord ID của bạn đã được Leader thêm vào hệ thống chưa?\n• Backend server đang chạy bình thường không?`)
+        .setFooter({ text: 'The Besties Gang • FiveM' })
+        .setTimestamp();
+      await message.reply({ embeds: [embed] });
     }
   }
 });

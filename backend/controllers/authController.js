@@ -321,7 +321,8 @@ const verifyCode = (code, discordId) => {
 
     if (!user) {
       console.log(`❌ Discord ID ${discordId} not found in users`);
-      return { success: false, error: 'Discord ID không được đăng ký trong hệ thống' };
+      console.log(`📋 Available Discord IDs: ${users.users.map(u => u.discordId || 'N/A').join(', ')}`);
+      return { success: false, error: `Discord ID ${discordId} không được đăng ký trong hệ thống. Vui lòng liên hệ Leader để được thêm vào.` };
     }
 
     // Mark as verified
