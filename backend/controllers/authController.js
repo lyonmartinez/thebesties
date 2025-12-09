@@ -170,7 +170,7 @@ const getCurrentUser = (req, res) => {
       role: user.role,
       email: user.email,
       character: user.character || null,
-      role: user.role || null,
+      memberRole: user.memberRole || null,
       bio: user.bio || null,
       folder: user.folder
     });
@@ -191,7 +191,7 @@ const updateMemberProfile = async (req, res) => {
 
     if (name !== undefined) users.users[userIndex].name = name;
     if (character !== undefined) users.users[userIndex].character = character;
-    if (role !== undefined) users.users[userIndex].role = role;
+    if (role !== undefined) users.users[userIndex].memberRole = role;
     if (bio !== undefined) users.users[userIndex].bio = bio;
     if (avatar) users.users[userIndex].avatar = avatar;
 
