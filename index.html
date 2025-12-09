@@ -386,7 +386,9 @@
     <script>
       // Load members from API
       (function() {
-        const API_URL = window.APP_CONFIG?.API_URL || 'http://localhost:5000/api' || 'https://thebesties-backend.onrender.com/api';
+        // Auto-detect API URL
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const API_URL = window.APP_CONFIG?.API_URL || (isLocalhost ? 'http://localhost:5000/api' : 'https://thebesties-backend.onrender.com/api');
         const membersGrid = document.getElementById('membersGrid');
         
         // Generate avatar letter from name
