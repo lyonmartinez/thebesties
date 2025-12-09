@@ -40,16 +40,24 @@ const uploadAvatar = async (req, res) => {
       return res.status(400).json({ error: 'Member folder not found' });
     }
 
-    const imagesDir = path.join(process.env.REPO_PATH || path.join(__dirname, '../../'), 'members', memberFolder, 'images');
+    // Get the correct repo path - go up from backend/controllers to project root
+    // __dirname is backend/controllers, so ../.. goes to project root
+    const repoPath = process.env.REPO_PATH || path.resolve(__dirname, '../..');
+    const imagesDir = path.join(repoPath, 'members', memberFolder, 'images');
+    
+    console.log('📁 Avatar upload path:', imagesDir);
+    console.log('📁 Member folder:', memberFolder);
     
     // Ensure images directory exists
     if (!fs.existsSync(imagesDir)) {
       fs.mkdirSync(imagesDir, { recursive: true });
+      console.log('✅ Created images directory:', imagesDir);
     }
 
     // Save avatar as avatar.png
     const avatarPath = path.join(imagesDir, 'avatar.png');
     fs.writeFileSync(avatarPath, req.file.buffer);
+    console.log('✅ Avatar saved to:', avatarPath);
 
     // Update user avatar path
     user.avatar = `members/${memberFolder}/images/avatar.png`;
@@ -92,15 +100,24 @@ const uploadGalleryImages = async (req, res) => {
       return res.status(400).json({ error: 'Member folder not found' });
     }
 
-    const imagesDir = path.join(process.env.REPO_PATH || path.join(__dirname, '../../'), 'members', memberFolder, 'images');
+    // Get the correct repo path - go up from backend/controllers to project root
+    // __dirname is backend/controllers, so ../.. goes to project root
+    const repoPath = process.env.REPO_PATH || path.resolve(__dirname, '../..');
+    const imagesDir = path.join(repoPath, 'members', memberFolder, 'images');
+    
+    console.log('📁 Gallery upload path:', imagesDir);
+    console.log('📁 Member folder:', memberFolder);
     
     // Ensure images directory exists
     if (!fs.existsSync(imagesDir)) {
       fs.mkdirSync(imagesDir, { recursive: true });
+      console.log('✅ Created images directory:', imagesDir);
     }
 
     // Get existing images count
-    const existingImages = fs.readdirSync(imagesDir).filter(f => f.startsWith('photo') && f.endsWith('.png'));
+    const existingImages = fs.existsSync(imagesDir) 
+      ? fs.readdirSync(imagesDir).filter(f => f.startsWith('photo') && f.endsWith('.png'))
+      : [];
     let nextIndex = existingImages.length + 1;
 
     const uploadedFiles = [];
@@ -108,6 +125,7 @@ const uploadGalleryImages = async (req, res) => {
       const filename = `photo${nextIndex + index}.png`;
       const filePath = path.join(imagesDir, filename);
       fs.writeFileSync(filePath, file.buffer);
+      console.log('✅ Gallery image saved to:', filePath);
       uploadedFiles.push(`members/${memberFolder}/images/${filename}`);
     });
 
