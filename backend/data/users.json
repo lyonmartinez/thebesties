@@ -33,7 +33,9 @@
       "character": "Driver / Escape",
       "folder": "member2",
       "createdAt": "2025-01-01T00:00:00Z",
-      "isActive": true
+      "isActive": true,
+      "discordId": "884246119285162055",
+      "discordUsername": "1_patrick."
     },
     {
       "id": "member-003",
