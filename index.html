@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <!-- Basic Content Security Policy for static site (adjust domain list as needed) -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; font-src https:; connect-src 'self' https:;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https:; font-src https:; connect-src 'self' https:;">
     <title>The Besties Gang Wiki | FiveM</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -66,7 +66,7 @@
         <div class="member-profile-layout" style="margin-top:18px;">
           <aside class="member-profile-meta">
             <div class="avatar-large">
-              <img src="images/logo_thebesties.png" alt="The Besties Gang" style="width:72px;height:72px;border-radius:999px;display:block;object-fit:cover;" onerror="this.style.display='none';" />
+              <img id="gangLogo" src="images/logo_thebesties.png" alt="The Besties Gang" style="width:72px;height:72px;border-radius:999px;display:block;object-fit:cover;" />
             </div>
             <h3 class="member-profile-role">The Besties • FiveM Gang</h3>
 
@@ -122,31 +122,8 @@
               <p class="member-gallery-note">
                 💡 Đặt ảnh vào thư mục <code>images/</code> để hiển thị tại đây.
               </p>
-              <div class="member-gallery">
-                <figure class="member-photo">
-                  <img src="images/gang1.jpg" alt="Gang highlight 1" onerror="this.parentElement.style.display='none';" />
-                  <figcaption>Khoảnh khắc chiến thuật</figcaption>
-                </figure>
-                <figure class="member-photo">
-                  <img src="images/gang2.jpg" alt="Gang highlight 2" onerror="this.parentElement.style.display='none';" />
-                  <figcaption>Cùng team</figcaption>
-                </figure>
-                <figure class="member-photo">
-                  <img src="images/gang3.jpg" alt="Gang highlight 3" onerror="this.parentElement.style.display='none';" />
-                  <figcaption>Thắng lợi</figcaption>
-                </figure>
-                <figure class="member-photo">
-                  <img src="images/gang4.jpg" alt="Gang highlight 4" onerror="this.parentElement.style.display='none';" />
-                  <figcaption>Trong nhiệm vụ</figcaption>
-                </figure>
-                <figure class="member-photo">
-                  <img src="images/gang5.jpg" alt="Gang highlight 5" onerror="this.parentElement.style.display='none';" />
-                  <figcaption>Khoảnh khắc đặc biệt</figcaption>
-                </figure>
-                <figure class="member-photo">
-                  <img src="images/gang6.jpg" alt="Gang highlight 6" onerror="this.parentElement.style.display='none';" />
-                  <figcaption>Highlight của Gang</figcaption>
-                </figure>
+              <div class="member-gallery" id="gangGallery">
+                <!-- Gallery images loaded dynamically -->
               </div>
             </section>
           </div>
@@ -162,7 +139,8 @@
         <div class="leader-card" style="align-items:center;">
           <div class="leader-avatar">
             <span class="crown">★</span>
-            <img class="leader-photo" src="members/leader/leader.jpg" alt="Leader Name" />
+            <img id="leaderPhoto" class="leader-photo" src="members/leader/leader.jpg" alt="Leader Name" />
+            <div id="leaderPlaceholder" style="display:none; width:100%; height:100%; background:linear-gradient(135deg, #ff5faf, #ff2b8a); border-radius:999px; display:flex; align-items:center; justify-content:center; color:white; font-size:48px; font-weight:bold;">L</div>
           </div>
           <div class="leader-info">
             <h3 class="leader-name">Leader Name</h3>
@@ -384,6 +362,56 @@
     </script>
 
     <script>
+      // Handle image errors to avoid CSP violations
+      document.addEventListener('DOMContentLoaded', function() {
+        // Handle logo error
+        const gangLogo = document.getElementById('gangLogo');
+        if (gangLogo) {
+          gangLogo.addEventListener('error', function() {
+            this.style.display = 'none';
+          });
+        }
+        
+        // Handle leader photo error
+        const leaderPhoto = document.getElementById('leaderPhoto');
+        const leaderPlaceholder = document.getElementById('leaderPlaceholder');
+        if (leaderPhoto && leaderPlaceholder) {
+          leaderPhoto.addEventListener('error', function() {
+            this.style.display = 'none';
+            leaderPlaceholder.style.display = 'flex';
+          });
+        }
+        
+        // Load gallery images dynamically
+        const gallery = document.getElementById('gangGallery');
+        if (gallery) {
+          const images = [
+            { src: 'images/gang1.jpg', caption: 'Khoảnh khắc chiến thuật' },
+            { src: 'images/gang2.jpg', caption: 'Cùng team' },
+            { src: 'images/gang3.jpg', caption: 'Thắng lợi' },
+            { src: 'images/gang4.jpg', caption: 'Trong nhiệm vụ' },
+            { src: 'images/gang5.jpg', caption: 'Khoảnh khắc đặc biệt' },
+            { src: 'images/gang6.jpg', caption: 'Highlight của Gang' }
+          ];
+          
+          images.forEach(function(img) {
+            const figure = document.createElement('figure');
+            figure.className = 'member-photo';
+            const imgEl = document.createElement('img');
+            imgEl.src = img.src;
+            imgEl.alt = img.caption;
+            imgEl.addEventListener('error', function() {
+              figure.style.display = 'none';
+            });
+            const caption = document.createElement('figcaption');
+            caption.textContent = img.caption;
+            figure.appendChild(imgEl);
+            figure.appendChild(caption);
+            gallery.appendChild(figure);
+          });
+        }
+      });
+      
       // Load members from API (wait for DOM and config to be ready)
       document.addEventListener('DOMContentLoaded', function() {
         // Wait a bit for config.js to load if needed
