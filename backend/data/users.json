@@ -10,15 +10,15 @@
       "character": "Leader Character",
       "createdAt": "2025-01-01T00:00:00Z",
       "isActive": true,
-      "discordId": "884246119285162055",
-      "discordUsername": "1_patrick.",
+      "discordId": "",
+      "discordUsername": "",
       "discordAvatar": "https://cdn.discordapp.com/avatars/884246119285162055/35a6074da97b2defa789b04152962eb9.webp"
     },
     {
-      "id": "member-1765300631437",
-      "discordId": "1393849154802946069",
-      "discordUsername": "marcusgraham_2025",
-      "discordAvatar": "https://cdn.discordapp.com/avatars/1393849154802946069/665dfa65df059a9bcd508c8b515d5cb3.png",
+      "id": "member-884246119285162055",
+      "discordId": "884246119285162055",
+      "discordUsername": "1_patrick.",
+      "discordAvatar": "https://cdn.discordapp.com/avatars/884246119285162055/35a6074da97b2defa789b04152962eb9.webp",
       "username": "marcusgraham_2025",
       "email": "marcusgraham_2025@thebesties.gang",
       "password": "$2a$10$wfaRwEYveZsHUluh2wSs4exRIdt38GbwbqXb8EQWkKQwe/42KfL3m",
@@ -27,7 +27,9 @@
       "character": "Thành viên Gang",
       "folder": "marcusgraham_2025",
       "createdAt": "2025-12-09T17:17:11.437Z",
-      "isActive": true
+      "isActive": true,
+      "bio": "hãy chờ đó",
+      "avatar": "members/marcusgraham_2025/images/avatar.png"
     }
   ]
 }

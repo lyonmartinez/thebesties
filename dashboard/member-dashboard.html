@@ -354,22 +354,47 @@
             <label for="name">Tên</label>
             <input type="text" id="name" name="name" required />
           </div>
+        </div>
+
+        <div class="button-group">
+          <button type="submit" class="btn primary" id="saveBtn">Lưu thay đổi</button>
+          <button type="button" class="btn secondary" onclick="window.location.href='../index.html'">Quay lại trang chủ</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-section">
+      <h2>Nhân vật / Vai trò</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Mô tả vai trò và nhân vật của bạn trong Gang</p>
+      
+      <form id="characterForm">
+        <div class="form-row full">
           <div class="form-group">
             <label for="character">Nhân vật / Vai trò</label>
             <input type="text" id="character" name="character" placeholder="Ví dụ: Xạ thủ / Hậu cần" />
           </div>
         </div>
 
+        <div class="button-group">
+          <button type="submit" class="btn primary" id="saveCharacterBtn">Lưu vai trò</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="form-section">
+      <h2>Tiểu sử / Giới thiệu</h2>
+      <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 16px;">Viết về câu chuyện và kinh nghiệm của bạn trong Gang</p>
+      
+      <form id="bioForm">
         <div class="form-row full">
           <div class="form-group">
             <label for="bio">Tiểu sử / Giới thiệu</label>
-            <textarea id="bio" name="bio" placeholder="Viết về chuyện của bạn trong gang..."></textarea>
+            <textarea id="bio" name="bio" placeholder="Viết về chuyện của bạn trong gang..." rows="6"></textarea>
           </div>
         </div>
 
         <div class="button-group">
-          <button type="submit" class="btn primary" id="saveBtn">Lưu thay đổi</button>
-          <button type="button" class="btn secondary" onclick="window.location.href='../index.html'">Quay lại trang chủ</button>
+          <button type="submit" class="btn primary" id="saveBioBtn">Lưu tiểu sử</button>
         </div>
       </form>
     </div>
