@@ -42,6 +42,11 @@ const getAllMembers = (req, res) => {
 // Public API: Get all active members (no auth required)
 const getPublicMembers = (req, res) => {
   try {
+    // Add cache control headers to prevent caching
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    
     const users = loadUsers();
     const members = users.users
       .filter(u => u.role === 'member' && u.isActive)
@@ -50,7 +55,8 @@ const getPublicMembers = (req, res) => {
         name: u.name,
         character: u.character || 'Thành viên Gang',
         folder: u.folder,
-        discordAvatar: u.discordAvatar || null
+        discordAvatar: u.discordAvatar || null,
+        bio: u.bio || null // Include bio for future use
       }));
 
     res.json({ success: true, members });
