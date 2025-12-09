@@ -623,15 +623,9 @@
         } catch (error) {
           clearTimeout(timeoutId);
           
-          // Backend not running or network error
-          if (error.name === 'AbortError' || error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-            const backendUrl = apiUrl.replace('/api', '');
-            showError('⚠️ Backend server chưa được khởi động!<br><br>' +
-                     '📋 <strong>Để sử dụng tính năng đăng nhập Discord:</strong><br>' +
-                     `1. Mở terminal và chạy: <code>cd backend && npm start</code><br>` +
-                     `2. Đảm bảo server chạy tại: <code>${backendUrl}</code><br>` +
-                     '3. Làm mới trang này sau khi server đã chạy');
-          }
+          // Backend not running or network error - silently fail
+          // User can still use the page, just Discord features won't work
+          console.warn('Backend not available:', error.message);
         }
       })();
 
@@ -903,11 +897,7 @@
         
         if (error.message === 'Failed to fetch' || error.message.includes('fetch') || error.name === 'TypeError') {
           const apiUrl = window.Auth.getAPIUrl();
-          const backendUrl = apiUrl.replace('/api', '');
-          errorMsg = '❌ Không thể kết nối đến server. Vui lòng kiểm tra:<br>' +
-                     `1. Backend server đã chạy chưa? (${backendUrl})<br>` +
-                     '2. Kiểm tra console (F12) để xem chi tiết lỗi<br>' +
-                     '3. Kiểm tra kết nối internet';
+          errorMsg = '❌ Không thể kết nối đến server. Vui lòng thử lại sau.';
         } else if (error.message.includes('JSON')) {
           errorMsg = '❌ Lỗi xử lý dữ liệu từ server. Vui lòng thử lại sau.';
         } else {
