@@ -67,8 +67,12 @@ const discordLogin = async (req, res) => {
     let user = users.users.find(u => u.discordId === discordId);
 
     if (!user) {
+      // Get leader name for error message
+      const leader = users.users.find(u => u.role === 'leader' && u.isActive);
+      const leaderName = leader ? leader.name : 'Leader';
+      
       return res.status(401).json({ 
-        error: 'Discord ID không được đăng ký trong hệ thống. Vui lòng liên hệ Leader để được thêm vào.' 
+        error: `Discord ID của bạn không có trong hệ thống của THE BESTIES. Có bất cứ gì hãy liên hệ với @${leaderName}` 
       });
     }
 
@@ -350,7 +354,12 @@ const verifyCode = (code, discordId) => {
     if (!user) {
       console.log(`❌ Discord ID ${discordId} not found in users`);
       console.log(`📋 Available Discord IDs: ${users.users.map(u => u.discordId || 'N/A').join(', ')}`);
-      return { success: false, error: `Discord ID ${discordId} không được đăng ký trong hệ thống. Vui lòng liên hệ Leader để được thêm vào.` };
+      // Get leader name for error message
+      const users = loadUsers();
+      const leader = users.users.find(u => u.role === 'leader' && u.isActive);
+      const leaderName = leader ? leader.name : 'Leader';
+      
+      return { success: false, error: `Discord ID ${discordId} không được đăng ký trong hệ thống. Vui lòng liên hệ @${leaderName} để được thêm vào.` };
     }
 
     // Mark as verified
