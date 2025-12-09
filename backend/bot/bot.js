@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, EmbedBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, SlashCommandBuilder, REST, Routes, EmbedBuilder, Partials } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
@@ -23,6 +23,8 @@ const client = new Client({
     GatewayIntentBits.MessageContent,
     GatewayIntentBits.DirectMessages, // For DM verification
   ],
+  // Enable partials so the bot can receive DMs and fetch channel data properly
+  partials: [Partials.Channel, Partials.Message, Partials.User],
 });
 
 // Register Slash Commands
