@@ -7,8 +7,18 @@ const axios = require('axios');
 const usersPath = path.join(__dirname, '../data/users.json');
 
 const loadUsers = () => {
-  const data = fs.readFileSync(usersPath, 'utf-8');
-  return JSON.parse(data);
+  try {
+    if (!fs.existsSync(usersPath)) {
+      console.error(`❌ users.json not found at: ${usersPath}`);
+      return { users: [] };
+    }
+    const data = fs.readFileSync(usersPath, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('❌ Error loading users.json:', error);
+    console.error('Error path:', usersPath);
+    throw error;
+  }
 };
 
 const saveUsers = (users) => {
@@ -336,7 +346,17 @@ const verifyCode = (code, discordId) => {
     return { success: true, user };
   } catch (error) {
     console.error('❌ Error verifying code:', error);
-    return { success: false, error: 'Lỗi khi xác thực code' };
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', {
+      code,
+      discordId,
+      message: error.message,
+      name: error.name
+    });
+    return { 
+      success: false, 
+      error: `Lỗi khi xác thực code: ${error.message || 'Lỗi không xác định'}` 
+    };
   }
 };
 

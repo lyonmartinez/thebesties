@@ -7,8 +7,18 @@ const { verifyCode } = require('../controllers/authController');
 const usersPath = path.join(__dirname, '../data/users.json');
 
 const loadUsers = () => {
-  const data = fs.readFileSync(usersPath, 'utf-8');
-  return JSON.parse(data);
+  try {
+    if (!fs.existsSync(usersPath)) {
+      console.error(`❌ users.json not found at: ${usersPath}`);
+      return { users: [] };
+    }
+    const data = fs.readFileSync(usersPath, 'utf-8');
+    return JSON.parse(data);
+  } catch (error) {
+    console.error('❌ Error loading users.json:', error);
+    console.error('Error path:', usersPath);
+    throw error;
+  }
 };
 
 const saveUsers = (users) => {
@@ -89,7 +99,9 @@ client.on('messageCreate', async message => {
   // Check if message looks like a verification code (6 characters, alphanumeric)
   if (/^[A-Z0-9]{6}$/.test(content)) {
     try {
+      console.log(`📨 Received verification code: ${content} from Discord ID: ${message.author.id}`);
       const result = verifyCode(content, message.author.id);
+      console.log(`📊 Verification result:`, result);
 
       if (result.success) {
         // Update Discord info in users.json
