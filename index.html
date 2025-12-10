@@ -119,9 +119,6 @@
 
             <section style="margin-top:24px;">
               <h4>Ảnh & Khoảnh khắc Gang</h4>
-              <p class="member-gallery-note">
-                💡 Đặt ảnh vào thư mục <code>images/</code> để hiển thị tại đây.
-              </p>
               <div class="member-gallery" id="gangGallery">
                 <!-- Gallery images loaded dynamically -->
               </div>
@@ -228,10 +225,6 @@
       <section id="news" class="section section-soft">
         <div class="section-header">
           <h2>Tin tức &amp; Cập nhật Gang</h2>
-          <p>
-            Khu vực cập nhật nhanh các thay đổi về The Besties: thành viên mới, liên minh, war đáng nhớ
-            hoặc event đặc biệt trong server FiveM.
-          </p>
         </div>
         <div class="news-list">
           <article class="news-item">
@@ -278,9 +271,6 @@
               Bấm nút bên cạnh để vào thẳng Discord.  
               Hãy thay link mời thật của bạn vào trong file <code>index.html</code> để mọi người dùng được.
             </p>
-            <p class="discord-link-hint">
-              Link hiện tại (ví dụ): <code>https://discord.gg/thebesties</code>
-            </p>
           </div>
           <div class="discord-actions">
             <a
@@ -291,9 +281,6 @@
             >
               Vào Discord Gang
             </a>
-            <p class="discord-note">
-              Đổi đường dẫn trong thuộc tính <code>href</code> bằng link mời Discord thật của Gang bạn.
-            </p>
           </div>
         </div>
       </section>
@@ -509,12 +496,6 @@
                   const members = fallbackData.members || [];
                   console.log('Loaded members from fallback:', members.length);
                   displayMembers(members);
-                  
-                  // Show subtle notice that using cached data
-                  const notice = document.createElement('p');
-                  notice.style.cssText = 'text-align: center; color: var(--text-muted); font-size: 12px; grid-column: 1 / -1; margin-top: 10px;';
-                  notice.textContent = '⚠️ Đang hiển thị dữ liệu tạm thời. Backend đang offline.';
-                  membersGrid.appendChild(notice);
                   return;
                 }
               } catch (fallbackError) {
@@ -545,7 +526,7 @@
     <footer class="footer">
       <p>
         The Besties Gang • FiveM  
-        <span class="footer-sub">Màu hồng nhưng không yếu đuối.</span>
+        <span class="footer-sub"></span>
       </p>
     </footer>
   </body>
